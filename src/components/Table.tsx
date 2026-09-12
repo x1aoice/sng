@@ -5,6 +5,7 @@ import { Seat } from './Seat';
 import { CommunityCards } from './CommunityCards';
 import { ActionPanel } from './ActionPanel';
 import { formatCurrency } from '../utils/format';
+import { Play, Pause } from 'lucide-react';
 
 interface TableProps {
   gameState: GameState;
@@ -49,22 +50,9 @@ export const Table: React.FC<TableProps> = ({
           }`}
         >
           {isPaused ? (
-            <svg className="w-3.5 h-3.5 fill-current translate-x-0.5" viewBox="0 0 24 24">
-              <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 0 0 0-1.69L9.54 5.98A.998.998 0 0 0 8 6.82z" />
-            </svg>
+            <Play className="w-3.5 h-3.5 fill-current" />
           ) : (
-            <svg
-              className="w-3.5 h-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="6" y="4" width="4" height="16" rx="1" />
-              <rect x="14" y="4" width="4" height="16" rx="1" />
-            </svg>
+            <Pause className="w-3.5 h-3.5 fill-current" />
           )}
         </button>
       </div>
