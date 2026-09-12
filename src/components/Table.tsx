@@ -42,28 +42,24 @@ export const Table: React.FC<TableProps> = ({
           type="button"
           onClick={onTogglePause}
           title={isPaused ? '继续对局' : '暂停对局'}
-          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white border transition-all duration-200 active:scale-90 cursor-pointer flex items-center justify-center backdrop-blur-xs ${
-            isPaused
-              ? 'border-sky-400 ring-2 ring-sky-300/40 shadow-sm text-sky-600'
-              : 'border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs text-neutral-700 hover:text-neutral-900'
-          }`}
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 hover:bg-white border border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs text-neutral-700 hover:text-neutral-900 transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center backdrop-blur-xs"
         >
           {isPaused ? (
-            /* Optical center play triangle */
-            <svg
-              className="w-4 h-4 fill-current translate-x-0.5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5.14v13.72a1 1 0 0 0 1.55.83l10.29-6.86a1 1 0 0 0 0-1.66L9.55 4.31A1 1 0 0 0 8 5.14z" />
-            </svg>
-          ) : (
-            /* Symmetrical rounded pause bars */
+            /* Perfectly centered, visually balanced play triangle */
             <svg
               className="w-4 h-4 fill-current"
               viewBox="0 0 24 24"
             >
-              <rect x="6" y="5" width="3.5" height="14" rx="1.5" />
-              <rect x="14.5" y="5" width="3.5" height="14" rx="1.5" />
+              <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 0 0 0-1.69L9.54 5.98A.998.998 0 0 0 8 6.82z" />
+            </svg>
+          ) : (
+            /* Perfectly centered symmetrical rounded pause bars */
+            <svg
+              className="w-4 h-4 fill-current"
+              viewBox="0 0 24 24"
+            >
+              <rect x="6.5" y="5.5" width="3.5" height="13" rx="1.5" />
+              <rect x="14" y="5.5" width="3.5" height="13" rx="1.5" />
             </svg>
           )}
         </button>
