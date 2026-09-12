@@ -66,7 +66,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         <button
           type="button"
           onClick={onToggleSpeed}
-          title={`Speed: ${speed}x`}
+          aria-label={`Speed: ${speed}x`}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
             speed === 2
               ? 'bg-neutral-900 text-white border-neutral-900'
@@ -81,7 +81,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         <button
           type="button"
           onClick={onToggleSound}
-          title={soundEnabled ? 'Mute' : 'Unmute'}
+          aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
           className="w-8 h-8 rounded-full bg-white border border-neutral-200/90 hover:bg-neutral-50 shadow-2xs flex items-center justify-center text-neutral-600 transition-all cursor-pointer"
         >
           {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-neutral-400" />}
@@ -91,7 +91,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         <button
           type="button"
           onClick={onToggleLogs}
-          title="Hand History"
+          aria-label="Hand history"
           className="w-8 h-8 rounded-full bg-white border border-neutral-200/90 hover:bg-neutral-50 shadow-2xs flex items-center justify-center text-neutral-600 transition-all cursor-pointer"
         >
           <ListCollapse className="w-4 h-4" />
@@ -101,7 +101,7 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         <button
           type="button"
           onClick={onResetGame}
-          title="Reset Tournament"
+          aria-label="Reset tournament"
           className="w-8 h-8 rounded-full bg-white border border-neutral-200/90 hover:bg-neutral-50 shadow-2xs flex items-center justify-center text-neutral-600 transition-all cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />

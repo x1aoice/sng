@@ -9,11 +9,11 @@ export interface BotDecision {
  * Distinct tournament poker personalities fed directly to the LLM prompt
  */
 const BOT_STYLES: Record<string, string> = {
-  Marcus: '松凶型选手(LAG)，极其激进，擅长利用下注施加巨额筹码压力与适时诈唬',
-  Leo: '狂野奔放型选手，入池率高，偏好在大底池中制造混乱并全下',
-  Alex: '稳健紧凶型选手(TAG)，深谙正期望值EV与起手牌范围，攻守平衡',
-  Elena: '多变灵动型选手，善于慢打强牌并敏锐捕捉对手破绽',
-  Sophia: '极度克制的石头型选手(Rock)，弃牌率极高，仅在拿到绝对强牌时猛烈反击',
+  Marcus: 'Loose-Aggressive (LAG): highly aggressive, applies relentless pressure with big bets and timely bluffs',
+  Leo: 'Wild & Unpredictable: high VPIP, loves building massive pots, creating chaos, and shoving all-in',
+  Alex: 'Tight-Aggressive (TAG): disciplined, strictly calculates +EV starting hand ranges, balanced attack and defense',
+  Elena: 'Tricky & Exploitative: excels at slow-playing monsters and identifying opponent weaknesses',
+  Sophia: 'Nit / Rock: ultra-patient, high fold frequency, strikes fiercely only with premium hands',
 };
 
 /**
@@ -34,27 +34,27 @@ export async function decideBotActionWithLLM(
   const commStr =
     communityCards.length > 0
       ? communityCards.map((c) => `${c.rank}${c.suit}`).join(' ')
-      : '无 (翻牌前)';
+      : 'None (Pre-flop)';
 
-  const styleDesc = BOT_STYLES[bot.name] || '职业德州扑克选手';
+  const styleDesc = BOT_STYLES[bot.name] || 'Professional Texas Hold\'em Player';
 
-  const prompt = `你是德州扑克(6-Max SNG)选手【${bot.name}】。
-你的风格：${styleDesc}。
+  const prompt = `You are Texas Hold'em (6-Max SNG) player [${bot.name}].
+Playing style: ${styleDesc}.
 
-当前牌局状况：
-- 你的手牌: [${cardsStr}]
-- 公共牌: [${commStr}]
-- 当前轮次: ${phase}
-- 当前底池: $${pot}
-- 当前最高注: $${currentHighestBet}
-- 你需跟注: $${toCall}
-- 你的筹码: $${bot.chips}
-- 最小加注: $${minRaiseAmount}
+Current table state:
+- Your hole cards: [${cardsStr}]
+- Community cards: [${commStr}]
+- Betting round: ${phase}
+- Pot size: $${pot}
+- Current highest bet: $${currentHighestBet}
+- Amount to call: $${toCall}
+- Your stack: $${bot.chips}
+- Min raise: $${minRaiseAmount}
 
-请以你的扑克风格，评估手牌赢率与底池赔率做出决策。
-请务必在回答末尾以单独一行给出 JSON：
+Evaluate your hand equity, pot odds, and opponent dynamics according to your style.
+At the very end of your response, output a single JSON line:
 \`\`\`json
-{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}
+{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": number}
 \`\`\``;
 
   const startTime = performance.now();

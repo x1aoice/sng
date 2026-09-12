@@ -139,27 +139,27 @@ class SoundManager {
     return this.enabled;
   }
 
-  // 1. Authentic knuckle knock on table ("真实敲桌子过牌声")
+  // 1. Authentic knuckle knock on table
   public playCheck() {
     this.playSound('check', 1.0);
   }
 
-  // 2. Authentic card discard into muck ("真实弃牌滑入废牌堆声")
+  // 2. Authentic card discard into muck
   public playFold() {
     this.playSound('fold', 0.95);
   }
 
-  // 3. Authentic heavy chip stack raise ("真实加注重注推筹码声")
+  // 3. Authentic heavy chip stack raise
   public playRaise() {
     this.playSound('raise', 1.0);
   }
 
-  // 4. Authentic dramatic all-in shove ("真实全下推池声")
+  // 4. Authentic dramatic all-in shove
   public playAllIn() {
     this.playSound('all_in', 1.0);
   }
 
-  // 5. Authentic chip bet / call ("真实跟注筹码碰撞声")
+  // 5. Authentic chip bet / call
   public playCall() {
     this.playSound('call', 0.85);
   }
@@ -168,17 +168,17 @@ class SoundManager {
     this.playCall();
   }
 
-  // 6. Authentic card deal slide ("真实发牌滑过台布声")
+  // 6. Authentic card deal slide
   public playCardDeal() {
     this.playSound('deal_player', 0.9);
   }
 
-  // 7. Authentic board card reveal / tap ("真实翻牌落台声")
+  // 7. Authentic board card reveal / tap
   public playCardFlip() {
     this.playSound('deal_board', 0.9);
   }
 
-  // 8. Authentic win fanfare ("真实胜利收池声")
+  // 8. Authentic win fanfare
   public playWin() {
     this.playSound('win', 1.0);
   }

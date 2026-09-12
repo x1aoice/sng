@@ -182,7 +182,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    title={m.sublabel}
                     className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
                       isPassed ? 'bg-white/75' : 'bg-[#9ca3af]'
                     }`}

@@ -26,6 +26,12 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   const heroPlayer = players.find((p) => p.isUser);
   const heroRank = heroPlayer?.finishRank || (heroPlayer?.chips && heroPlayer.chips > 0 ? 1 : 99);
 
+  const getOrdinal = (n: number) => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
   useEffect(() => {
     if (isHeroWinner) {
       try {
@@ -52,13 +58,13 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-neutral-900">锦标赛结束</h2>
+        <h2 className="text-xl font-bold text-neutral-900">Tournament Concluded</h2>
         <p className="text-xs text-neutral-500 mt-1 mb-6">
           {isHeroWinner
-            ? `🎉 恭喜斩获冠军！赢得 ${formatTokens(PAYOUT_FIRST_PLACE)} 巨额奖金！`
+            ? `🎉 Champion! You won 1st Place and ${formatTokens(PAYOUT_FIRST_PLACE)}!`
             : heroRank === 2
-            ? `🥈 获得亚军！赢得 ${formatTokens(PAYOUT_SECOND_PLACE)} 奖金！`
-            : `你获得了第 ${heroRank} 名。${winner?.name || '冠军'} 斩获第一名 (${formatTokens(PAYOUT_FIRST_PLACE)})。`}
+            ? `🥈 Runner-Up! You won 2nd Place and ${formatTokens(PAYOUT_SECOND_PLACE)}!`
+            : `You finished in ${getOrdinal(heroRank)} place. ${winner?.name || 'Winner'} won 1st Place (${formatTokens(PAYOUT_FIRST_PLACE)}).`}
         </p>
 
         {/* Final Standings Table */}
@@ -125,7 +131,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           onClick={onRestart}
           className="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-semibold rounded-full shadow-md active:scale-98 transition-all cursor-pointer"
         >
-          再来一局 (Play Again)
+          Play Again
         </button>
       </div>
     </div>

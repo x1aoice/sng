@@ -41,8 +41,7 @@ export const Table: React.FC<TableProps> = ({
         <button
           type="button"
           onClick={onTogglePause}
-          title={isPaused ? '继续对局' : '暂停对局'}
-          aria-label={isPaused ? '继续对局' : '暂停对局'}
+          aria-label={isPaused ? 'Resume' : 'Pause'}
           className={`w-8 h-8 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center backdrop-blur-xs select-none ${
             isPaused
               ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs hover:bg-neutral-800'
@@ -115,14 +114,13 @@ export const Table: React.FC<TableProps> = ({
                 <div
                   onClick={onStartNextHand}
                   className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
-                  title={isHeroBusted ? "你已出局，点击立即查看结算" : "点击立即开始下一手"}
                 >
                   <div className="bg-neutral-900 text-white text-[13px] font-medium px-5 py-2 rounded-full shadow-md flex items-center gap-2 group-hover:scale-[1.02] active:scale-95 transition-all">
                     <span>{isHeroBusted ? '💀' : '🏆'}</span>
                     <span>{gameState.handResults[0].description}</span>
                     {isHeroBusted && (
                       <span className="text-neutral-400 text-xs font-normal border-l border-neutral-700 pl-2">
-                        你已出局 · 点击结算
+                        Eliminated · View Results
                       </span>
                     )}
                   </div>
