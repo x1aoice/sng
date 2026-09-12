@@ -12,6 +12,7 @@ import type { ActionType } from './engine/types';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(createInitialGameState());
+  const [isPaused, setIsPaused] = useState(false);
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
@@ -19,6 +20,7 @@ export const App: React.FC = () => {
   // Reset tournament
   const handleResetGame = () => {
     setGameState(createInitialGameState());
+    setIsPaused(false);
   };
 
   // Start hand
@@ -31,9 +33,9 @@ export const App: React.FC = () => {
     setGameState((prev) => handlePlayerAction(prev, action, amount));
   }, []);
 
-  // Automatically start next hand after a hand concludes
+  // Automatically start next hand after a hand concludes (freezes if paused)
   useEffect(() => {
-    if (gameState.phase !== 'hand_ended') return;
+    if (gameState.phase !== 'hand_ended' || isPaused) return;
 
     const autoDealDelay = 2200;
     const timer = setTimeout(() => {
@@ -41,10 +43,11 @@ export const App: React.FC = () => {
     }, autoDealDelay);
 
     return () => clearTimeout(timer);
-  }, [gameState.phase, gameState.handNumber]);
+  }, [gameState.phase, gameState.handNumber, isPaused]);
 
   // Bot AI decision and thinking simulation loop (powered by built-in FreeLLMAPI)
   useEffect(() => {
+    if (isPaused) return;
     const state = gameState;
     const currentSeat = state.currentTurnSeat;
 
@@ -104,8 +107,9 @@ export const App: React.FC = () => {
     };
   }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet]);
 
-  // Hero countdown timer
+  // Hero countdown timer (freezes if paused)
   useEffect(() => {
+    if (isPaused) return;
     const state = gameState;
     if (
       state.currentTurnSeat !== 0 ||
@@ -146,7 +150,7 @@ export const App: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [gameState.currentTurnSeat, gameState.phase]);
+  }, [gameState.currentTurnSeat, gameState.phase, isPaused]);
 
   return (
     <div className="min-h-screen w-full bg-white text-neutral-900 flex flex-col justify-center items-center select-none relative overflow-x-hidden overflow-y-auto p-4 sm:p-6">
@@ -156,6 +160,8 @@ export const App: React.FC = () => {
           gameState={gameState}
           onHeroAction={handleHeroAction}
           onStartNextHand={handleStartNextHand}
+          isPaused={isPaused}
+          onTogglePause={() => setIsPaused((prev) => !prev)}
         />
       </main>
 
