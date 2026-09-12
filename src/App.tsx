@@ -33,11 +33,15 @@ export const App: React.FC = () => {
     setGameState((prev) => handlePlayerAction(prev, action, amount));
   }, []);
 
-  // Automatically start next hand after a hand concludes (freezes if paused)
+  // Automatically start next hand or tournament conclusion after a hand concludes
   useEffect(() => {
     if (gameState.phase !== 'hand_ended' || isPaused) return;
 
-    const autoDealDelay = 2200;
+    const hero = gameState.players.find((p) => p.isUser);
+    const isHeroEliminated = hero ? (hero.eliminated || hero.chips <= 0) : false;
+    // If Hero was eliminated, transition to tournament results promptly
+    const autoDealDelay = isHeroEliminated ? 1400 : 2200;
+
     const timer = setTimeout(() => {
       setGameState((prev) => (prev.phase === 'hand_ended' ? startHand(prev) : prev));
     }, autoDealDelay);

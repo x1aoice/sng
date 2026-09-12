@@ -112,19 +112,28 @@ export const Table: React.FC<TableProps> = ({
           {/* Sub-center Area below Community Cards (Results Announcement / Next Hand Button) */}
           <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3.5 flex flex-col items-center pointer-events-auto whitespace-nowrap">
 
-            {/* Hand Result Announcement Banner (Auto-deals next hand) */}
-            {gameState.phase === 'hand_ended' && gameState.handResults.length > 0 && (
-              <div
-                onClick={onStartNextHand}
-                className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
-                title="Click to deal immediately"
-              >
-                <div className="bg-neutral-900 text-white text-[13px] font-medium px-5 py-2 rounded-full shadow-md flex items-center gap-2 group-hover:scale-[1.02] active:scale-95 transition-all">
-                  <span>🏆</span>
-                  <span>{gameState.handResults[0].description}</span>
+            {/* Hand Result Announcement Banner (Auto-deals next hand or concludes tournament) */}
+            {gameState.phase === 'hand_ended' && gameState.handResults.length > 0 && (() => {
+              const hero = gameState.players.find((p) => p.isUser);
+              const isHeroBusted = hero ? (hero.eliminated || hero.chips <= 0) : false;
+              return (
+                <div
+                  onClick={onStartNextHand}
+                  className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
+                  title={isHeroBusted ? "你已出局，点击立即查看结算" : "点击立即开始下一手"}
+                >
+                  <div className="bg-neutral-900 text-white text-[13px] font-medium px-5 py-2 rounded-full shadow-md flex items-center gap-2 group-hover:scale-[1.02] active:scale-95 transition-all">
+                    <span>{isHeroBusted ? '💀' : '🏆'}</span>
+                    <span>{gameState.handResults[0].description}</span>
+                    {isHeroBusted && (
+                      <span className="text-neutral-400 text-xs font-normal border-l border-neutral-700 pl-2">
+                        你已出局 · 点击结算
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Initial Start Button */}
             {gameState.phase === 'idle' && (

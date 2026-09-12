@@ -188,14 +188,34 @@ export function countPlayers(
 }
 
 export function startHand(state: GameState): GameState {
+  const hero = state.players.find((p) => p.isUser);
   const activePlayers = state.players.filter((p) => !p.eliminated);
-  if (activePlayers.length <= 1) {
+  const isHeroEliminated = hero ? (hero.eliminated || hero.chips <= 0) : false;
+
+  // Conclude tournament if only 1 player remains or if the human Hero has been eliminated
+  if (activePlayers.length <= 1 || isHeroEliminated) {
+    // Sort surviving players by chip counts descending to determine final tournament ranks
+    const sortedRemaining = [...activePlayers].sort((a, b) => b.chips - a.chips);
+
     const awardedPlayers = state.players.map((p) => {
-      if (p.finishRank === 1 || (!p.eliminated && p.chips > 0)) {
-        return { ...p, finishRank: 1, prizeWon: PAYOUT_FIRST_PLACE };
+      // If player was still active, assign rank based on final chip stack
+      const remainingIdx = sortedRemaining.findIndex((r) => r.id === p.id);
+      if (remainingIdx !== -1) {
+        const rank = remainingIdx + 1;
+        const prize = rank === 1 ? PAYOUT_FIRST_PLACE : rank === 2 ? PAYOUT_SECOND_PLACE : 0;
+        return {
+          ...p,
+          finishRank: rank,
+          prizeWon: prize,
+        };
       }
-      if (p.finishRank === 2) return { ...p, prizeWon: PAYOUT_SECOND_PLACE };
-      return { ...p, prizeWon: 0 };
+
+      // Player was already eliminated
+      const prize = p.finishRank === 2 ? PAYOUT_SECOND_PLACE : 0;
+      return {
+        ...p,
+        prizeWon: prize,
+      };
     });
 
     return {

@@ -52,13 +52,13 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-neutral-900">Tournament Finished</h2>
+        <h2 className="text-xl font-bold text-neutral-900">锦标赛结束</h2>
         <p className="text-xs text-neutral-500 mt-1 mb-6">
           {isHeroWinner
-            ? `🎉 Congratulations! You won the Championship and ${formatTokens(PAYOUT_FIRST_PLACE)}!`
+            ? `🎉 恭喜斩获冠军！赢得 ${formatTokens(PAYOUT_FIRST_PLACE)} 巨额奖金！`
             : heroRank === 2
-            ? `🥈 Runner-Up! You won ${formatTokens(PAYOUT_SECOND_PLACE)}!`
-            : `${winner?.name || 'Winner'} won 1st Place (${formatTokens(PAYOUT_FIRST_PLACE)}).`}
+            ? `🥈 获得亚军！赢得 ${formatTokens(PAYOUT_SECOND_PLACE)} 奖金！`
+            : `你获得了第 ${heroRank} 名。${winner?.name || '冠军'} 斩获第一名 (${formatTokens(PAYOUT_FIRST_PLACE)})。`}
         </p>
 
         {/* Final Standings Table */}
@@ -125,7 +125,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           onClick={onRestart}
           className="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-semibold rounded-full shadow-md active:scale-98 transition-all cursor-pointer"
         >
-          Play Again
+          再来一局 (Play Again)
         </button>
       </div>
     </div>
