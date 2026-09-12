@@ -8,7 +8,7 @@ import { decideBotAction, type BotDecision } from '../ai/pokerBot';
 export const BUILTIN_LLM_CONFIG = {
   baseUrl: 'https://free.icomefrom.asia/v1',
   apiKey: 'YOUR_API_KEY_HERE',
-  model: 'auto',
+  model: 'llama-3.1-8b-instruct',
 };
 
 /**
@@ -56,22 +56,21 @@ export async function decideBotActionWithLLM(
 {"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}
 严禁附带任何其他文字、分析或 markdown 标签。`;
 
+  const startTime = performance.now();
+
   try {
     const controller = new AbortController();
-    // 2.2s timeout to maintain fast game pace
-    const timeoutId = setTimeout(() => controller.abort(), 2200);
+    // 6s timeout gives ample headroom for fast 2s LLM generation
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-    const useProxy = isHttps;
-    const url = useProxy ? '/api/chat' : `${BUILTIN_LLM_CONFIG.baseUrl}/chat/completions`;
+    // Route through /api/chat (proxied by Vite in dev, Edge function on Vercel to bypass CORS)
+    const url = '/api/chat';
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${BUILTIN_LLM_CONFIG.apiKey}`,
+      'x-freellmapi-url': BUILTIN_LLM_CONFIG.baseUrl,
     };
-    if (useProxy) {
-      headers['x-freellmapi-url'] = BUILTIN_LLM_CONFIG.baseUrl;
-    }
 
     const res = await fetch(url, {
       method: 'POST',
@@ -81,17 +80,23 @@ export async function decideBotActionWithLLM(
         model: BUILTIN_LLM_CONFIG.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 40,
-        temperature: 0.3,
+        temperature: 0.2,
       }),
     });
 
     clearTimeout(timeoutId);
-    if (!res.ok) return fallback;
+    if (!res.ok) {
+      console.warn(`[⚠️ FreeLLMAPI HTTP ${res.status}] ${bot.name} fallback to local GTO:`, fallback.action);
+      return fallback;
+    }
 
     const data = await res.json();
     const rawContent = data.choices?.[0]?.message?.content || '';
     const match = rawContent.match(/\{[\s\S]*?\}/);
-    if (!match) return fallback;
+    if (!match) {
+      console.warn(`[⚠️ FreeLLMAPI format mismatch] raw: "${rawContent}", fallback to local GTO:`, fallback.action);
+      return fallback;
+    }
 
     const parsed = JSON.parse(match[0]);
     const validActions: ActionType[] = ['fold', 'check', 'call', 'raise', 'allin'];
@@ -105,10 +110,15 @@ export async function decideBotActionWithLLM(
       if (action === 'allin') {
         amount = bot.chips;
       }
+      const elapsed = Math.round(performance.now() - startTime);
+      console.log(`%c[🤖 FreeLLMAPI] ${bot.name} acted ${action.toUpperCase()}${amount ? ` ($${amount})` : ''} (${elapsed}ms)`, 'color: #0284c7; font-weight: bold;');
       return { action, amount };
     }
+
     return fallback;
-  } catch {
+  } catch (err: unknown) {
+    const elapsed = Math.round(performance.now() - startTime);
+    console.warn(`[⚠️ FreeLLMAPI ${err instanceof Error ? err.name : 'Error'} after ${elapsed}ms] ${bot.name} fallback to local GTO:`, fallback.action);
     return fallback;
   }
 }
