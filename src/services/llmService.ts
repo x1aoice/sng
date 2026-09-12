@@ -11,9 +11,9 @@ const STORAGE_KEY = 'poker_freellmapi_config';
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
   enabled: true,
-  baseUrl: 'http://localhost:8000/v1',
-  apiKey: '',
-  model: 'deepseek-chat',
+  baseUrl: 'https://free.icomefrom.asia/v1',
+  apiKey: 'YOUR_API_KEY_HERE',
+  model: 'auto',
   botChatEnabled: true,
   coachEnabled: true,
 };
@@ -37,6 +37,44 @@ export function saveLLMConfig(config: LLMConfig): void {
 }
 
 /**
+ * Smart endpoint resolver:
+ * 1. If deployed on HTTPS (e.g. Vercel) and user enters an insecure HTTP URL (http://...),
+ *    browser blocks direct fetch (Mixed Content). We route via /api/chat serverless proxy!
+ * 2. If user sets /api/chat or leaves empty, route via /api/chat with server env variables.
+ * 3. Otherwise direct fetch to ${baseUrl}/chat/completions.
+ */
+function resolveFetchEndpoint(config: LLMConfig): {
+  url: string;
+  headers: Record<string, string>;
+} {
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const rawBase = (config.baseUrl || '').trim();
+  const isHttpUrl = rawBase.startsWith('http://');
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (config.apiKey.trim()) {
+    headers['Authorization'] = `Bearer ${config.apiKey.trim()}`;
+  }
+
+  if (rawBase === '/api/chat' || (isHttps && isHttpUrl) || !rawBase) {
+    if (rawBase && isHttpUrl) {
+      headers['x-freellmapi-url'] = rawBase;
+    }
+    return {
+      url: '/api/chat',
+      headers,
+    };
+  }
+
+  return {
+    url: `${rawBase.replace(/\/+$/, '')}/chat/completions`,
+    headers,
+  };
+}
+
+/**
  * Test server connectivity with a lightweight prompt
  */
 export async function testLLMConnection(config: LLMConfig): Promise<{
@@ -46,18 +84,11 @@ export async function testLLMConnection(config: LLMConfig): Promise<{
   error?: string;
 }> {
   const start = performance.now();
-  const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+  const { url, headers } = resolveFetchEndpoint(config);
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (config.apiKey.trim()) {
-      headers['Authorization'] = `Bearer ${config.apiKey.trim()}`;
-    }
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const res = await fetch(url, {
       method: 'POST',
@@ -237,16 +268,10 @@ export async function generateBotDialogue(
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (config.apiKey.trim()) {
-      headers['Authorization'] = `Bearer ${config.apiKey.trim()}`;
-    }
+    const { url, headers } = resolveFetchEndpoint(config);
 
-    const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
     const res = await fetch(url, {
       method: 'POST',
       headers,
@@ -310,16 +335,10 @@ export async function generateCoachAdvice(
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (config.apiKey.trim()) {
-      headers['Authorization'] = `Bearer ${config.apiKey.trim()}`;
-    }
+    const { url, headers } = resolveFetchEndpoint(config);
 
-    const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`;
     const res = await fetch(url, {
       method: 'POST',
       headers,

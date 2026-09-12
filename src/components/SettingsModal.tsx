@@ -78,15 +78,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex flex-col gap-1.5">
             <label className="font-semibold text-neutral-700 flex items-center justify-between">
               <span>API 接口地址 (Base URL)</span>
-              <span className="text-[11px] text-neutral-400 font-normal">须兼容 OpenAI /v1 规范</span>
+              <span className="text-[11px] text-neutral-400 font-normal">兼容 OpenAI /v1 规范</span>
             </label>
             <input
               type="text"
               value={formData.baseUrl}
               onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
-              placeholder="http://192.168.1.100:8000/v1 或 https://api.xxx/v1"
+              placeholder="http://你的服务器IP:8000/v1 或 /api/chat"
               className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none text-xs transition-all font-mono"
             />
+            <span className="text-[10.5px] text-neutral-400 leading-tight">
+              💡 部署到 Vercel 时，系统会自动通过 Edge 函数转发你的 HTTP 服务器，彻底免受浏览器 Mixed Content 和跨域 CORS 拦截。
+            </span>
           </div>
 
           {/* Model Name */}
