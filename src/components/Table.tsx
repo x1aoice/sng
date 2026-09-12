@@ -36,22 +36,27 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center select-none pt-10 sm:pt-12 pb-2">
-      {/* Top-Right Pause / Resume Button */}
+      {/* Top-Right Pure Circle Pause Button (No text, just round button) */}
       <div className="absolute top-0 right-3 sm:right-6 z-40">
         <button
           type="button"
           onClick={onTogglePause}
-          title={isPaused ? '继续游戏' : '暂停游戏'}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 hover:bg-white border border-neutral-200/90 shadow-2xs hover:shadow-xs text-xs font-semibold text-neutral-800 transition-all active:scale-95 cursor-pointer backdrop-blur-xs"
+          title={isPaused ? '继续' : '暂停'}
+          className="w-8 h-8 rounded-full bg-white/95 hover:bg-white border border-neutral-200/90 shadow-2xs hover:shadow-xs flex items-center justify-center text-neutral-700 hover:text-neutral-900 transition-all active:scale-95 cursor-pointer backdrop-blur-xs"
         >
-          <span className="text-[11px]">{isPaused ? '▶' : '⏸'}</span>
-          <span className="text-[12px]">{isPaused ? '继续' : '暂停'}</span>
+          <span className="text-xs leading-none select-none">{isPaused ? '▶' : '⏸'}</span>
         </button>
       </div>
 
-      {/* Stadium Poker Table - Expansive 750px x 430px with classic 1.74:1 golden proportion */}
+      {/* Main Game Area (Turns completely grayscale when paused) */}
       <div
-        className="relative w-[750px] max-w-[92vw] h-[430px] max-h-[58vh] rounded-full bg-[#f5f5f7] border border-neutral-200/40 transition-all flex items-center justify-center"
+        className={`w-full flex flex-col items-center justify-center transition-all duration-300 ${
+          isPaused ? 'grayscale opacity-60 pointer-events-none' : ''
+        }`}
+      >
+        {/* Stadium Poker Table - Expansive 750px x 430px with classic 1.74:1 golden proportion */}
+        <div
+          className="relative w-[750px] max-w-[92vw] h-[430px] max-h-[58vh] rounded-full bg-[#f5f5f7] border border-neutral-200/40 transition-all flex items-center justify-center"
         style={{
           boxShadow: '0 2px 20px rgba(0, 0, 0, 0.025)',
         }}
@@ -138,34 +143,7 @@ export const Table: React.FC<TableProps> = ({
           gamePhase={gameState.phase}
         />
       </div>
-
-      {/* Pause Overlay Indicator */}
-      {isPaused && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/35 backdrop-blur-[2px] animate-fade-in select-none">
-          <div
-            className="bg-white px-8 py-5 rounded-3xl shadow-xl border border-neutral-200/80 flex flex-col items-center gap-3 animate-in zoom-in-95 duration-150"
-            style={{
-              boxShadow: '0 20px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.05)',
-            }}
-          >
-            <div className="w-11 h-11 rounded-full bg-neutral-100 flex items-center justify-center text-base text-neutral-800 font-bold">
-              ⏸
-            </div>
-            <div className="text-center">
-              <h3 className="text-[15px] font-bold text-neutral-900 tracking-tight">对局已暂停</h3>
-              <p className="text-xs text-neutral-400 mt-0.5">思考倒计时与操作已冻结</p>
-            </div>
-            <button
-              type="button"
-              onClick={onTogglePause}
-              className="mt-1 px-6 py-2 bg-neutral-900 hover:bg-neutral-800 active:scale-95 text-white text-xs font-bold rounded-full shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <span>▶</span>
-              <span>继续游戏</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
+  </div>
   );
 };
