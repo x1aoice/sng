@@ -34,7 +34,7 @@ export default async function handler(req: Request): Promise<Response> {
 
     const baseUrl = (customUrl || envUrl || 'https://free.icomefrom.asia/v1').replace(/\/+$/, '');
     const authHeader = customAuth || (envKey ? `Bearer ${envKey}` : '');
-    const model = body.model || envModel || 'llama-3.1-8b-instruct';
+    const model = body.model || envModel || 'auto';
 
     if (!authHeader) {
       return new Response(

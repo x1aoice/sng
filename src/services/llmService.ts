@@ -52,15 +52,17 @@ export async function decideBotActionWithLLM(
 - 最小加注: $${minRaiseAmount}
 
 请以你的扑克风格，评估手牌赢率与底池赔率做出决策。
-必须且仅返回纯 JSON，严禁任何额外文字或解释：
-{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}`;
+请务必在回答末尾以单独一行给出 JSON：
+\`\`\`json
+{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}
+\`\`\``;
 
   const startTime = performance.now();
 
   try {
     const controller = new AbortController();
-    // 8-second safety timeout
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    // 12-second safety timeout accommodates auto reasoning models while fitting within 30s timer
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const url = '/api/chat';
     const headers: Record<string, string> = {
@@ -72,8 +74,9 @@ export async function decideBotActionWithLLM(
       headers,
       signal: controller.signal,
       body: JSON.stringify({
+        model: 'auto',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 40,
+        max_tokens: 500,
         temperature: 0.25,
       }),
     });
@@ -112,7 +115,7 @@ export async function decideBotActionWithLLM(
 
     const elapsed = Math.round(performance.now() - startTime);
     console.log(
-      `%c[🤖 LLM Player · ${bot.name}] Action: ${action.toUpperCase()}${amount ? ` ($${amount})` : ''} | Latency: ${elapsed}ms`,
+      `%c[🤖 LLM Player · ${bot.name} (auto)] Action: ${action.toUpperCase()}${amount ? ` ($${amount})` : ''} | Latency: ${elapsed}ms`,
       'color: #0284c7; font-weight: bold;'
     );
 
