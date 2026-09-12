@@ -36,41 +36,36 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center select-none pt-10 sm:pt-12 pb-2">
-      {/* Top-Right Refined Minimalist Pause Button */}
+      {/* Top-Right Pure Minimalist Pause/Resume Icon Button */}
       <div className="absolute top-2 right-4 sm:top-3 sm:right-6 z-40">
         <button
           type="button"
           onClick={onTogglePause}
           title={isPaused ? '继续对局' : '暂停对局'}
-          className={`h-8 px-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 text-xs font-medium backdrop-blur-xs select-none ${
+          aria-label={isPaused ? '继续对局' : '暂停对局'}
+          className={`w-8 h-8 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center backdrop-blur-xs select-none ${
             isPaused
               ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs hover:bg-neutral-800'
               : 'bg-white/95 hover:bg-white text-neutral-600 hover:text-neutral-900 border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs'
           }`}
         >
           {isPaused ? (
-            <>
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 0 0 0-1.69L9.54 5.98A.998.998 0 0 0 8 6.82z" />
-              </svg>
-              <span>继续</span>
-            </>
+            <svg className="w-3.5 h-3.5 fill-current translate-x-0.5" viewBox="0 0 24 24">
+              <path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18a1 1 0 0 0 0-1.69L9.54 5.98A.998.998 0 0 0 8 6.82z" />
+            </svg>
           ) : (
-            <>
-              <svg
-                className="w-3.5 h-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="6" y="4" width="4" height="16" rx="1" />
-                <rect x="14" y="4" width="4" height="16" rx="1" />
-              </svg>
-              <span>暂停</span>
-            </>
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
+            </svg>
           )}
         </button>
       </div>
