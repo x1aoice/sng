@@ -25,7 +25,6 @@ export default async function handler(req: Request): Promise<Response> {
   try {
     const body = await req.json();
 
-    // Priority: Header from frontend > Server Environment Variable > Default fallback
     const customUrl = req.headers.get('x-freellmapi-url');
     const customAuth = req.headers.get('authorization');
 
@@ -34,24 +33,27 @@ export default async function handler(req: Request): Promise<Response> {
     const envModel = process.env.FREELLMAPI_MODEL;
 
     const baseUrl = (customUrl || envUrl || 'https://free.icomefrom.asia/v1').replace(/\/+$/, '');
-    const authHeader = customAuth || (envKey ? `Bearer ${envKey}` : 'Bearer YOUR_API_KEY_HERE');
-    const model = body.model || envModel || 'auto';
+    const authHeader = customAuth || (envKey ? `Bearer ${envKey}` : '');
+    const model = body.model || envModel || 'llama-3.1-8b-instruct';
+
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'FREELLMAPI_KEY is not configured on server' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     const targetUrl = `${baseUrl}/chat/completions`;
-
-    const forwardHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (authHeader) {
-      forwardHeaders['Authorization'] = authHeader;
-    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const upstreamResponse = await fetch(targetUrl, {
       method: 'POST',
-      headers: forwardHeaders,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authHeader,
+      },
       signal: controller.signal,
       body: JSON.stringify({
         ...body,
@@ -61,27 +63,22 @@ export default async function handler(req: Request): Promise<Response> {
 
     clearTimeout(timeoutId);
 
-    const data = await upstreamResponse.text();
-
-    return new Response(data, {
+    const data = await upstreamResponse.json();
+    return new Response(JSON.stringify(data), {
       status: upstreamResponse.status,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
     });
-  } catch (err: any) {
-    return new Response(
-      JSON.stringify({
-        error: err.name === 'AbortError' ? 'Upstream FreeLLMAPI timeout (12s)' : `Proxy error: ${err.message || 'Unknown'}`,
-      }),
-      {
-        status: 502,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
   }
 }

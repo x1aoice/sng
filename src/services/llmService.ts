@@ -6,16 +6,6 @@ export interface BotDecision {
 }
 
 /**
- * Built-in FreeLLMAPI Configuration
- * Directly embedded for serverless and browser play
- */
-export const BUILTIN_LLM_CONFIG = {
-  baseUrl: 'https://free.icomefrom.asia/v1',
-  apiKey: 'YOUR_API_KEY_HERE',
-  model: 'llama-3.1-8b-instruct',
-};
-
-/**
  * Distinct tournament poker personalities fed directly to the LLM prompt
  */
 const BOT_STYLES: Record<string, string> = {
@@ -28,7 +18,8 @@ const BOT_STYLES: Record<string, string> = {
 
 /**
  * 100% Pure LLM Poker Decision Engine
- * Every single bot move is decided exclusively by FreeLLMAPI (no local bot algorithm).
+ * Routes through secure /api/chat proxy (Vite dev proxy or Vercel Edge Serverless Function).
+ * Zero hardcoded private API keys in client-side bundles!
  */
 export async function decideBotActionWithLLM(
   bot: Player,
@@ -74,8 +65,6 @@ export async function decideBotActionWithLLM(
     const url = '/api/chat';
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${BUILTIN_LLM_CONFIG.apiKey}`,
-      'x-freellmapi-url': BUILTIN_LLM_CONFIG.baseUrl,
     };
 
     const res = await fetch(url, {
@@ -83,7 +72,6 @@ export async function decideBotActionWithLLM(
       headers,
       signal: controller.signal,
       body: JSON.stringify({
-        model: BUILTIN_LLM_CONFIG.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 40,
         temperature: 0.25,
