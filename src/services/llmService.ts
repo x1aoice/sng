@@ -1,5 +1,9 @@
 import type { Player, Card, GamePhase, ActionType } from '../engine/types';
-import { decideBotAction, type BotDecision } from '../ai/pokerBot';
+
+export interface BotDecision {
+  action: ActionType;
+  amount?: number;
+}
 
 /**
  * Built-in FreeLLMAPI Configuration
@@ -12,9 +16,19 @@ export const BUILTIN_LLM_CONFIG = {
 };
 
 /**
- * Powered by built-in FreeLLMAPI:
- * Intelligently decides poker action (Fold/Check/Call/Raise/All-in) via LLM,
- * with instantaneous local GTO fallback if the network request exceeds timeout or fails.
+ * Distinct tournament poker personalities fed directly to the LLM prompt
+ */
+const BOT_STYLES: Record<string, string> = {
+  Marcus: '松凶型选手(LAG)，极其激进，擅长利用下注施加巨额筹码压力与适时诈唬',
+  Leo: '狂野奔放型选手，入池率高，偏好在大底池中制造混乱并全下',
+  Alex: '稳健紧凶型选手(TAG)，深谙正期望值EV与起手牌范围，攻守平衡',
+  Elena: '多变灵动型选手，善于慢打强牌并敏锐捕捉对手破绽',
+  Sophia: '极度克制的石头型选手(Rock)，弃牌率极高，仅在拿到绝对强牌时猛烈反击',
+};
+
+/**
+ * 100% Pure LLM Poker Decision Engine
+ * Every single bot move is decided exclusively by FreeLLMAPI (no local bot algorithm).
  */
 export async function decideBotActionWithLLM(
   bot: Player,
@@ -24,16 +38,6 @@ export async function decideBotActionWithLLM(
   minRaiseAmount: number,
   phase: GamePhase
 ): Promise<BotDecision> {
-  // Always compute fallback first
-  const fallback = decideBotAction(
-    bot,
-    communityCards,
-    pot,
-    currentHighestBet,
-    minRaiseAmount,
-    phase
-  );
-
   const toCall = Math.max(0, currentHighestBet - bot.currentBet);
   const cardsStr = bot.cards.map((c) => `${c.rank}${c.suit}`).join(' ');
   const commStr =
@@ -41,31 +45,33 @@ export async function decideBotActionWithLLM(
       ? communityCards.map((c) => `${c.rank}${c.suit}`).join(' ')
       : '无 (翻牌前)';
 
-  const prompt = `你是德州扑克(6-Max SNG)职业选手${bot.name}。当前轮到你行动。
-底牌: [${cardsStr}]
-公共牌: [${commStr}]
-当前阶段: ${phase}
-当前底池: $${pot}
-当前最高下注: $${currentHighestBet}
-你需要跟注: $${toCall}
-你的剩余筹码: $${bot.chips}
-最小加注额: $${minRaiseAmount}
+  const styleDesc = BOT_STYLES[bot.name] || '职业德州扑克选手';
 
-请根据你的手牌强弱、底池赔率和筹码深度做出最优决策。
-严格仅返回一行纯 JSON 格式：
-{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}
-严禁附带任何其他文字、分析或 markdown 标签。`;
+  const prompt = `你是德州扑克(6-Max SNG)选手【${bot.name}】。
+你的风格：${styleDesc}。
+
+当前牌局状况：
+- 你的手牌: [${cardsStr}]
+- 公共牌: [${commStr}]
+- 当前轮次: ${phase}
+- 当前底池: $${pot}
+- 当前最高注: $${currentHighestBet}
+- 你需跟注: $${toCall}
+- 你的筹码: $${bot.chips}
+- 最小加注: $${minRaiseAmount}
+
+请以你的扑克风格，评估手牌赢率与底池赔率做出决策。
+必须且仅返回纯 JSON，严禁任何额外文字或解释：
+{"action": "fold" | "check" | "call" | "raise" | "allin", "amount": 数字}`;
 
   const startTime = performance.now();
 
   try {
     const controller = new AbortController();
-    // 6s timeout gives ample headroom for fast 2s LLM generation
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    // 8-second safety timeout
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    // Route through /api/chat (proxied by Vite in dev, Edge function on Vercel to bypass CORS)
     const url = '/api/chat';
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${BUILTIN_LLM_CONFIG.apiKey}`,
@@ -80,45 +86,54 @@ export async function decideBotActionWithLLM(
         model: BUILTIN_LLM_CONFIG.model,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 40,
-        temperature: 0.2,
+        temperature: 0.25,
       }),
     });
 
     clearTimeout(timeoutId);
+
     if (!res.ok) {
-      console.warn(`[⚠️ FreeLLMAPI HTTP ${res.status}] ${bot.name} fallback to local GTO:`, fallback.action);
-      return fallback;
+      throw new Error(`HTTP ${res.status}`);
     }
 
     const data = await res.json();
     const rawContent = data.choices?.[0]?.message?.content || '';
     const match = rawContent.match(/\{[\s\S]*?\}/);
     if (!match) {
-      console.warn(`[⚠️ FreeLLMAPI format mismatch] raw: "${rawContent}", fallback to local GTO:`, fallback.action);
-      return fallback;
+      throw new Error(`Invalid JSON format: ${rawContent}`);
     }
 
     const parsed = JSON.parse(match[0]);
     const validActions: ActionType[] = ['fold', 'check', 'call', 'raise', 'allin'];
-    if (validActions.includes(parsed.action)) {
-      let action = parsed.action as ActionType;
-      // Sanity checks
-      if (action === 'check' && toCall > 0) {
-        action = 'call';
-      }
-      let amount = typeof parsed.amount === 'number' ? parsed.amount : fallback.amount;
-      if (action === 'allin') {
-        amount = bot.chips;
-      }
-      const elapsed = Math.round(performance.now() - startTime);
-      console.log(`%c[🤖 FreeLLMAPI] ${bot.name} acted ${action.toUpperCase()}${amount ? ` ($${amount})` : ''} (${elapsed}ms)`, 'color: #0284c7; font-weight: bold;');
-      return { action, amount };
+    if (!validActions.includes(parsed.action)) {
+      throw new Error(`Invalid action: ${parsed.action}`);
     }
 
-    return fallback;
+    let action = parsed.action as ActionType;
+    // Sanity check: cannot check if facing a bet
+    if (action === 'check' && toCall > 0) {
+      action = 'call';
+    }
+
+    let amount = typeof parsed.amount === 'number' ? parsed.amount : undefined;
+    if (action === 'allin') {
+      amount = bot.chips;
+    } else if (action === 'raise' && !amount) {
+      amount = Math.min(bot.chips, currentHighestBet + minRaiseAmount);
+    }
+
+    const elapsed = Math.round(performance.now() - startTime);
+    console.log(
+      `%c[🤖 LLM Player · ${bot.name}] Action: ${action.toUpperCase()}${amount ? ` ($${amount})` : ''} | Latency: ${elapsed}ms`,
+      'color: #0284c7; font-weight: bold;'
+    );
+
+    return { action, amount };
   } catch (err: unknown) {
     const elapsed = Math.round(performance.now() - startTime);
-    console.warn(`[⚠️ FreeLLMAPI ${err instanceof Error ? err.name : 'Error'} after ${elapsed}ms] ${bot.name} fallback to local GTO:`, fallback.action);
-    return fallback;
+    console.error(`[⚠️ LLM Error · ${bot.name}] (${elapsed}ms):`, err);
+    // Standard poker tournament rules when player times out or disconnects: auto-check or auto-fold
+    const timeoutAction: ActionType = toCall <= 0 ? 'check' : 'fold';
+    return { action: timeoutAction, amount: 0 };
   }
 }
