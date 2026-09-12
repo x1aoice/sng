@@ -133,7 +133,13 @@ export const Seat: React.FC<SeatProps> = ({
             </span>
             <span>Thinking</span>
             <span className="text-neutral-300">·</span>
-            <span className="text-neutral-700 font-semibold tabular-nums">
+            <span
+              className={`font-semibold tabular-nums transition-colors duration-200 ${
+                (player.thinkingSeconds ?? 30) <= 8
+                  ? 'text-rose-500 font-bold animate-pulse'
+                  : 'text-neutral-700'
+              }`}
+            >
               {player.thinkingSeconds ?? 30}s
             </span>
           </div>
