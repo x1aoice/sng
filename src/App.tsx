@@ -5,69 +5,20 @@ import {
   createInitialGameState,
 } from './engine/gameEngine';
 import type { GameState } from './engine/gameEngine';
-import { decideBotAction } from './ai/pokerBot';
+import { decideBotActionWithLLM } from './services/llmService';
 import { Table } from './components/Table';
 import { GameOverModal } from './components/GameOverModal';
-import { SettingsModal } from './components/SettingsModal';
-import { CoachModal } from './components/CoachModal';
-import {
-  loadLLMConfig,
-  generateBotDialogue,
-  type LLMConfig,
-} from './services/llmService';
-import { formatCurrency } from './utils/format';
 import type { ActionType } from './engine/types';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(createInitialGameState());
-  const [llmConfig, setLlmConfig] = useState<LLMConfig>(loadLLMConfig);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isCoachOpen, setIsCoachOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Record<number, string>>({});
-  const chatTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
 
-  // Trigger in-character bot dialogue bubble
-  const triggerBotChat = useCallback(
-    async (
-      seatIndex: number,
-      action: 'raise' | 'allin' | 'call' | 'fold' | 'win',
-      context: {
-        potAmountStr?: string;
-        actionAmountStr?: string;
-      }
-    ) => {
-      if (!llmConfig.botChatEnabled) return;
-
-      const bot = gameStateRef.current.players[seatIndex];
-      if (!bot || bot.isUser) return;
-
-      const text = await generateBotDialogue(bot.name, action, context, llmConfig);
-      if (!text) return;
-
-      if (chatTimersRef.current[seatIndex]) {
-        clearTimeout(chatTimersRef.current[seatIndex]);
-      }
-
-      setChatMessages((prev) => ({ ...prev, [seatIndex]: text }));
-
-      chatTimersRef.current[seatIndex] = setTimeout(() => {
-        setChatMessages((prev) => {
-          const next = { ...prev };
-          delete next[seatIndex];
-          return next;
-        });
-      }, 4200);
-    },
-    [llmConfig]
-  );
-
   // Reset tournament
   const handleResetGame = () => {
     setGameState(createInitialGameState());
-    setChatMessages({});
   };
 
   // Start hand
@@ -80,30 +31,19 @@ export const App: React.FC = () => {
     setGameState((prev) => handlePlayerAction(prev, action, amount));
   }, []);
 
-  // Automatically start next hand after a hand concludes & trigger winner dialogue
+  // Automatically start next hand after a hand concludes
   useEffect(() => {
     if (gameState.phase !== 'hand_ended') return;
 
-    // If bot won the hand, trigger victory trash talk / reaction
-    if (gameState.handResults.length > 0) {
-      const winnerId = gameState.handResults[0].playerId;
-      const winnerPlayer = gameState.players.find((p) => p.id === winnerId);
-      if (winnerPlayer && !winnerPlayer.isUser && Math.random() < 0.8) {
-        triggerBotChat(winnerPlayer.seatIndex, 'win', {
-          potAmountStr: formatCurrency(gameState.handResults[0].wonAmount),
-        });
-      }
-    }
-
-    const autoDealDelay = 2500;
+    const autoDealDelay = 2200;
     const timer = setTimeout(() => {
       setGameState((prev) => (prev.phase === 'hand_ended' ? startHand(prev) : prev));
     }, autoDealDelay);
 
     return () => clearTimeout(timer);
-  }, [gameState.phase, gameState.handNumber, triggerBotChat]);
+  }, [gameState.phase, gameState.handNumber]);
 
-  // Bot AI decision and thinking simulation loop
+  // Bot AI decision and thinking simulation loop (powered by built-in FreeLLMAPI)
   useEffect(() => {
     const state = gameState;
     const currentSeat = state.currentTurnSeat;
@@ -124,7 +64,7 @@ export const App: React.FC = () => {
       return;
     }
 
-    const baseThinkingMs = 1100 + Math.random() * 1100;
+    const baseThinkingMs = 1200 + Math.random() * 800;
     const initialSeconds = Math.max(1, Math.round(baseThinkingMs / 1000));
 
     setGameState((prev) => {
@@ -137,41 +77,32 @@ export const App: React.FC = () => {
       };
     });
 
-    const timeoutId = setTimeout(() => {
-      const latest = gameStateRef.current;
-      if (latest.currentTurnSeat !== currentSeat) return;
+    let isCancelled = false;
 
-      const decision = decideBotAction(
-        latest.players[currentSeat],
-        latest.communityCards,
-        latest.pot,
-        latest.currentHighestBet,
-        latest.minRaiseAmount,
-        latest.phase
+    // Concurrently trigger LLM decision while bot is thinking
+    (async () => {
+      const decision = await decideBotActionWithLLM(
+        bot,
+        state.communityCards,
+        state.pot,
+        state.currentHighestBet,
+        state.minRaiseAmount,
+        state.phase
       );
 
-      setGameState((prev) => handlePlayerAction(prev, decision.action, decision.amount));
+      setTimeout(() => {
+        if (isCancelled) return;
+        const latest = gameStateRef.current;
+        if (latest.currentTurnSeat !== currentSeat) return;
 
-      // Trigger in-character bot dialogue for noteworthy moves
-      if (decision.action === 'allin') {
-        triggerBotChat(currentSeat, 'allin', {
-          potAmountStr: formatCurrency(latest.pot),
-          actionAmountStr: 'All-in 全下',
-        });
-      } else if (decision.action === 'raise') {
-        triggerBotChat(currentSeat, 'raise', {
-          potAmountStr: formatCurrency(latest.pot),
-          actionAmountStr: formatCurrency(decision.amount),
-        });
-      } else if (decision.action === 'fold' && latest.currentHighestBet > 0 && Math.random() < 0.4) {
-        triggerBotChat(currentSeat, 'fold', {
-          potAmountStr: formatCurrency(latest.pot),
-        });
-      }
-    }, baseThinkingMs);
+        setGameState((prev) => handlePlayerAction(prev, decision.action, decision.amount));
+      }, baseThinkingMs);
+    })();
 
-    return () => clearTimeout(timeoutId);
-  }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet, triggerBotChat]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet]);
 
   // Hero countdown timer
   useEffect(() => {
@@ -219,39 +150,14 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-white text-neutral-900 flex flex-col justify-center items-center select-none relative overflow-x-hidden overflow-y-auto p-4 sm:p-6">
-
-      {/* Main Poker Arena - purely centered table and controls */}
+      {/* Main Poker Arena - purely centered table and controls with 0 clutter */}
       <main className="w-full flex items-center justify-center my-auto">
         <Table
           gameState={gameState}
           onHeroAction={handleHeroAction}
           onStartNextHand={handleStartNextHand}
-          chatMessages={chatMessages}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onOpenCoach={() => setIsCoachOpen(true)}
         />
       </main>
-
-      {/* Settings Modal for FreeLLMAPI */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        config={llmConfig}
-        onUpdateConfig={(newCfg) => setLlmConfig(newCfg)}
-      />
-
-      {/* AI Poker Coach Modal */}
-      <CoachModal
-        isOpen={isCoachOpen}
-        onClose={() => setIsCoachOpen(false)}
-        hero={gameState.players[0]}
-        communityCards={gameState.communityCards}
-        phase={gameState.phase}
-        pot={gameState.pot}
-        currentHighestBet={gameState.currentHighestBet}
-        minRaiseAmount={gameState.minRaiseAmount}
-        config={llmConfig}
-      />
 
       {/* Game Over / Tournament Finished Modal */}
       {gameState.phase === 'tournament_ended' && (

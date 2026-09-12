@@ -10,18 +10,12 @@ interface TableProps {
   gameState: GameState;
   onHeroAction: (action: ActionType, amount?: number) => void;
   onStartNextHand: () => void;
-  chatMessages?: Record<number, string>;
-  onOpenSettings?: () => void;
-  onOpenCoach?: () => void;
 }
 
 export const Table: React.FC<TableProps> = ({
   gameState,
   onHeroAction,
   onStartNextHand,
-  chatMessages = {},
-  onOpenSettings,
-  onOpenCoach,
 }) => {
   const hero = gameState.players[0]; // 'You' at seatIndex 0
   const isHeroTurn = gameState.currentTurnSeat === 0;
@@ -38,31 +32,6 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center select-none pt-10 sm:pt-12 pb-2">
-      {/* Top Floating Controls: AI Coach & FreeLLMAPI Settings */}
-      <div className="absolute top-0 right-3 sm:right-6 flex items-center gap-2 z-40">
-        {onOpenCoach && (
-          <button
-            type="button"
-            onClick={onOpenCoach}
-            title="打开 AI 德州大师教练分析"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 hover:bg-white border border-neutral-200/90 shadow-2xs hover:shadow-xs text-xs font-semibold text-neutral-800 transition-all active:scale-95 cursor-pointer backdrop-blur-xs"
-          >
-            <span>🧠</span>
-            <span className="hidden sm:inline">AI 教练</span>
-          </button>
-        )}
-        {onOpenSettings && (
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            title="配置 FreeLLMAPI & 游戏设置"
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/95 hover:bg-white border border-neutral-200/90 shadow-2xs hover:shadow-xs text-neutral-600 hover:text-neutral-900 transition-all active:scale-95 cursor-pointer backdrop-blur-xs"
-          >
-            <span className="text-sm">⚙️</span>
-          </button>
-        )}
-      </div>
-
       {/* Stadium Poker Table - Expansive 750px x 430px with classic 1.74:1 golden proportion */}
       <div
         className="relative w-[750px] max-w-[92vw] h-[430px] max-h-[58vh] rounded-full bg-[#f5f5f7] border border-neutral-200/40 transition-all flex items-center justify-center"
@@ -135,7 +104,6 @@ export const Table: React.FC<TableProps> = ({
               positionClass={seatPositions[player.seatIndex]}
               showCards={gameState.showdownCardsRevealed}
               handPhase={gameState.phase}
-              chatMessage={chatMessages[player.seatIndex]}
             />
           );
         })}
