@@ -2,6 +2,7 @@ import React from 'react';
 import type { Player } from '../engine/types';
 import { PlayingCard } from './PlayingCard';
 import { PlayerAvatar } from './Avatars';
+import { ChatBubble } from './ChatBubble';
 import { formatCurrency } from '../utils/format';
 
 interface SeatProps {
@@ -11,6 +12,7 @@ interface SeatProps {
   positionClass: string;
   showCards?: boolean;
   handPhase: string;
+  chatMessage?: string;
 }
 
 export const Seat: React.FC<SeatProps> = ({
@@ -20,6 +22,7 @@ export const Seat: React.FC<SeatProps> = ({
   positionClass,
   showCards = false,
   handPhase,
+  chatMessage,
 }) => {
   const hasCards = player.cards.length === 2 && !player.folded && !player.eliminated;
   const isHero = player.isUser;
@@ -52,6 +55,11 @@ export const Seat: React.FC<SeatProps> = ({
       }`}
     >
       <div className="relative flex flex-col items-center">
+        {/* Chat / Trash-talk bubble */}
+        {chatMessage && (
+          <ChatBubble message={chatMessage} seatIndex={player.seatIndex} />
+        )}
+
         {/* Hole cards (Hero and revealed opponents get full-size lg cards) */}
         {hasCards && (
           <div
