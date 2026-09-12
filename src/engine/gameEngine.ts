@@ -358,7 +358,7 @@ export function handlePlayerAction(
       if (p.chips === 0) p.isAllIn = true;
       p.lastAction = { type: 'call', amount: callChips, text: `Call ${formatTokens(p.currentBet)}` };
       logText = `${p.name} calls ${formatTokens(callChips)}`;
-      sound.playChip();
+      sound.playCall();
       break;
     }
 
@@ -390,7 +390,7 @@ export function handlePlayerAction(
         text: `${actName} ${formatTokens(newBetTotal)}`,
       };
       logText = `${p.name} ${actName.toLowerCase()}s to ${formatTokens(newBetTotal)}`;
-      sound.playChip();
+      sound.playRaise();
       break;
     }
 
@@ -416,7 +416,7 @@ export function handlePlayerAction(
         text: `All-in ${formatTokens(newBetTotal)}`,
       };
       logText = `${p.name} goes All-in with ${formatTokens(newBetTotal)}`;
-      sound.playChip();
+      sound.playAllIn();
       break;
     }
   }
