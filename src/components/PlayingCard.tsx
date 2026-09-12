@@ -46,23 +46,26 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Minimalist Central Poker Logo Mark */}
+        {/* Minimalist Central Emblem - Modern Star Compass */}
         <svg
-          viewBox="-15 -18 30 40"
+          viewBox="0 0 24 24"
           className={`${
-            size === 'lg' ? 'w-6 h-8' : size === 'md' ? 'w-5 h-6.5' : 'w-4 h-5'
+            size === 'lg' ? 'w-6 h-6' : size === 'md' ? 'w-5 h-5' : 'w-4 h-4'
           } text-neutral-800 select-none`}
           fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          {/* Sculpted Modern Minimalist Spade */}
+          {/* Subtle geometric star contour */}
           <path
-            d="M 0,-16 C -2.5,-10 -13,-1.5 -13,7 C -13,13 -8.5,16.5 -3,16.5 C -0.5,16.5 0,15 0,15 C 0,15 0.5,16.5 3,16.5 C 8.5,16.5 13,13 13,7 C 13,-1.5 2.5,-10 0,-16 Z"
+            d="M12 2 Q12 12 22 12 Q12 12 12 22 Q12 12 2 12 Q12 12 12 2 Z"
             fill="currentColor"
+            fillOpacity="0.08"
           />
-          {/* Modern Geometric Stem */}
-          <path d="M -1.8,15 L -3.5,20 L 3.5,20 L 1.8,15 Z" fill="currentColor" />
-          {/* Negative-Space Diamond Heart */}
-          <polygon points="0,3.5 3.5,7.5 0,11.5 -3.5,7.5" fill="#ffffff" />
+          {/* Center core gem */}
+          <circle cx="12" cy="12" r="1.75" fill="currentColor" stroke="none" />
         </svg>
       </div>
     );
