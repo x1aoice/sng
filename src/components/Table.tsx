@@ -131,20 +131,16 @@ export const Table: React.FC<TableProps> = ({
                 </button>
               )}
 
-              {/* Blind Level Pill (Always displayed right below the community cards!) */}
-              <div
-                className="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-neutral-200/80 shadow-2xs text-xs whitespace-nowrap animate-fade-in"
-                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
-              >
-                <span className="text-neutral-500 font-medium">Hand #{handNum}</span>
-                <span className="text-neutral-300">·</span>
-                <span className="font-bold text-neutral-900">
-                  {formatTokens(currentBlind.sb)} / {formatTokens(currentBlind.bb)}
-                </span>
-                <span className="text-[10px] text-amber-700 bg-amber-50 font-semibold px-2 py-0.5 rounded-full border border-amber-200/70 ml-0.5">
-                  x2 next hand
-                </span>
-              </div>
+              {/* Blind Level Typography (Pure text, no border/box, no next-hand badge, hidden when idle) */}
+              {gameState.phase !== 'idle' && (
+                <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-medium tracking-tight animate-fade-in select-none">
+                  <span>Hand #{handNum}</span>
+                  <span className="text-neutral-300">·</span>
+                  <span className="text-neutral-700 font-semibold">
+                    {formatTokens(currentBlind.sb)} / {formatTokens(currentBlind.bb)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
