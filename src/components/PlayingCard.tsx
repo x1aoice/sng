@@ -46,7 +46,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Pure Minimalist White Card Back - Cute Chibi Bubble Fish Logo (Zero borders/frames) */}
+        {/* Pure Minimalist White Card Back - Iconic Polaris Star Mark (Dead Center, Small & Refined) */}
         <svg
           viewBox={size === 'sm' ? '0 0 44 62' : '0 0 60 84'}
           className="w-full h-full text-neutral-900 select-none pointer-events-none"
@@ -55,38 +55,15 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           <g
             transform={
               size === 'sm'
-                ? 'translate(22, 19) scale(0.68)'
-                : 'translate(30, 42) scale(0.95)'
+                ? 'translate(22, 31) scale(0.85)'
+                : 'translate(30, 42) scale(1.18)'
             }
           >
-            {/* Cute Little Bubble with shine */}
-            <circle cx="16" cy="-10" r="1.8" fill="currentColor" />
-            <circle cx="16.5" cy="-10.5" r="0.6" fill="#ffffff" />
-            {/* Chubby Round Fish Body */}
+            {/* Modern Polaris 4-Point Concave Star */}
             <path
-              d="M 12,-1 C 12,-9 1,-13 -8,-10 C -16,-7 -18,-2 -19,1 C -18,4 -15,10 -7,10 C 2,10 12,6 12,-1 Z"
+              d="M 0,-7.5 C 0.5,-2.2 2.2,-0.5 7.5,0 C 2.2,0.5 0.5,2.2 0,7.5 C -0.5,2.2 -2.2,0.5 -7.5,0 C -2.2,-0.5 -0.5,-2.2 0,-7.5 Z"
               fill="currentColor"
             />
-            {/* Cute Butterfly/Scallop Tail */}
-            <path
-              d="M -17,1 C -21,-4 -26,-7 -29,-6 C -27,-1 -25,1 -27,3 C -25,3 -23,4 -21,6 C -20,4 -18,2 -17,1 Z"
-              fill="currentColor"
-            />
-            {/* Adorable Dorsal Fin */}
-            <path
-              d="M -3,-10 C 0,-14 5,-14 6,-9 C 2,-10 0,-10 -3,-10 Z"
-              fill="currentColor"
-            />
-            {/* Flutter Pectoral Fin with negative space */}
-            <ellipse cx="-1" cy="4" rx="4" ry="2.2" transform="rotate(-30 -1 4)" fill="#ffffff" />
-            <ellipse cx="-1.5" cy="4" rx="2.8" ry="1.5" transform="rotate(-30 -1.5 4)" fill="currentColor" />
-            {/* Giant Sparkly Anime Chibi Eye */}
-            <circle cx="4.5" cy="-2.5" r="3.6" fill="#ffffff" />
-            <circle cx="5.2" cy="-2.5" r="2.4" fill="currentColor" />
-            <circle cx="6.2" cy="-3.3" r="1.0" fill="#ffffff" />
-            <circle cx="4.2" cy="-1.5" r="0.5" fill="#ffffff" />
-            {/* Cute Pout Mouth */}
-            <path d="M 12,-2 C 14,-1.5 14,-0.5 12,0 Z" fill="currentColor" />
           </g>
         </svg>
       </div>
