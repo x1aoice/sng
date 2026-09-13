@@ -31,8 +31,8 @@ Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, pers
 - **🎨 Minimalist Apple / OpenAI Design System**
   - Pure white and neutral felt aesthetic with zero visual clutter.
   - Symmetrically balanced stadium table with 6 radial seats.
-  - Seamless responsive slider bet control with min/max, 2.5BB, half-pot, and all-in shortcuts.
-  - Interactive hand log drawer and instant auto-deal progression.
+  - Responsive slider bet control with min, pot-fraction, and all-in milestones.
+  - Instant auto-deal progression between hands.
 
 - **🔊 Recorded Casino Sound Effects**
   - Local MP3 assets are preloaded and played through Web Audio, with an HTML Audio fallback.
@@ -56,7 +56,7 @@ Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, pers
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18+ recommended)
+- Node.js 22.12 or newer
 - npm or pnpm or yarn
 
 ### Installation

@@ -45,7 +45,7 @@ export const BLIND_LEVELS: BlindLevel[] = Array.from({ length: 12 }, (_, i) => g
 
 export const INITIAL_PLAYERS: Omit<
   Player,
-  'cards' | 'currentBet' | 'totalHandBet' | 'folded' | 'isAllIn' | 'hasActedThisRound' | 'eliminated'
+  'cards' | 'currentBet' | 'totalHandBet' | 'folded' | 'isAllIn' | 'hasActedThisRound' | 'canRaise' | 'eliminated'
 >[] = [
   {
     id: 'p0',
@@ -126,6 +126,7 @@ export function createInitialGameState(): GameState {
     folded: false,
     isAllIn: false,
     hasActedThisRound: false,
+    canRaise: true,
     eliminated: false,
   }));
 
@@ -266,6 +267,7 @@ export function startHand(state: GameState): GameState {
     folded: p.eliminated,
     isAllIn: false,
     hasActedThisRound: false,
+    canRaise: true,
     lastAction: undefined,
     isThinking: false,
     thinkingSeconds: undefined,
@@ -376,12 +378,28 @@ export function handlePlayerAction(
   }
 
   if (normalizedAction === 'bet' || normalizedAction === 'raise') {
+    if (!p.canRaise) {
+      normalizedAction = toCall > 0 ? 'call' : 'check';
+      normalizedAmount = undefined;
+    }
+  }
+
+  if (
+    normalizedAction === 'allin' &&
+    !p.canRaise &&
+    p.currentBet + p.chips > currentHighestBet
+  ) {
+    normalizedAction = toCall > 0 ? 'call' : 'check';
+    normalizedAmount = undefined;
+  }
+
+  if (normalizedAction === 'bet' || normalizedAction === 'raise') {
     normalizedAction = currentHighestBet > 0 ? 'raise' : 'bet';
 
     const maxTarget = p.currentBet + p.chips;
-    const minTarget = currentHighestBet > 0
-      ? currentHighestBet + minRaiseAmount
-      : Math.max(minRaiseAmount, 1);
+    const minTarget = currentHighestBet === 0 || currentHighestBet < minRaiseAmount
+      ? Math.max(minRaiseAmount, 1)
+      : currentHighestBet + minRaiseAmount;
 
     if (maxTarget <= currentHighestBet) {
       normalizedAction = toCall > 0 ? 'call' : 'check';
@@ -397,6 +415,8 @@ export function handlePlayerAction(
       normalizedAmount = Math.max(minTarget, Math.min(maxTarget, requestedTarget));
     }
   }
+
+  let isFullRaise = false;
 
   switch (normalizedAction) {
     case 'fold': {
@@ -442,6 +462,7 @@ export function handlePlayerAction(
       pot += actualBet;
 
       if (raiseDiff > 0) {
+        isFullRaise = raiseDiff >= minRaiseAmount;
         minRaiseAmount = Math.max(minRaiseAmount, raiseDiff);
         currentHighestBet = newBetTotal;
       }
@@ -471,6 +492,7 @@ export function handlePlayerAction(
       p.isAllIn = true;
 
       if (raiseDiff > 0) {
+        isFullRaise = raiseDiff >= minRaiseAmount;
         minRaiseAmount = Math.max(minRaiseAmount, raiseDiff);
         currentHighestBet = newBetTotal;
       }
@@ -486,7 +508,16 @@ export function handlePlayerAction(
     }
   }
 
+  if (isFullRaise) {
+    for (const player of updatedPlayers) {
+      if (!player.eliminated && !player.folded && !player.isAllIn) {
+        player.canRaise = true;
+      }
+    }
+  }
+
   p.hasActedThisRound = true;
+  p.canRaise = normalizedAction === 'check';
   p.isThinking = false;
 
   const newLog: HandLog = {
@@ -563,6 +594,7 @@ export function advanceToNextPhase(state: GameState): GameState {
     ...p,
     currentBet: 0,
     hasActedThisRound: false,
+    canRaise: true,
     lastAction: undefined,
   }));
 
@@ -585,6 +617,7 @@ export function advanceToNextPhase(state: GameState): GameState {
       deck,
       communityCards,
       currentHighestBet: 0,
+      minRaiseAmount: getBlindForHand(state.handNumber).bb,
       phase: 'flop',
       currentTurnSeat: firstTurn,
     };
@@ -611,6 +644,7 @@ export function advanceToNextPhase(state: GameState): GameState {
       deck,
       communityCards,
       currentHighestBet: 0,
+      minRaiseAmount: getBlindForHand(state.handNumber).bb,
       phase: 'turn',
       currentTurnSeat: firstTurn,
     };
@@ -637,6 +671,7 @@ export function advanceToNextPhase(state: GameState): GameState {
       deck,
       communityCards,
       currentHighestBet: 0,
+      minRaiseAmount: getBlindForHand(state.handNumber).bb,
       phase: 'river',
       currentTurnSeat: firstTurn,
     };
@@ -707,15 +742,23 @@ export function resolveShowdown(state: GameState): GameState {
 
 // Check eliminations and update tournament ranks
 export function resolveHandEnd(state: GameState): GameState {
-  const activeBefore = state.players.filter((p) => !p.eliminated).length;
+  const newlyEliminated = state.players
+    .filter((p) => !p.eliminated && p.chips <= 0)
+    .sort((a, b) => b.totalHandBet - a.totalHandBet || a.seatIndex - b.seatIndex);
+  const remainingCount = state.players.filter(
+    (p) => !p.eliminated && p.chips > 0
+  ).length;
+  const eliminationRanks = new Map(
+    newlyEliminated.map((player, index) => [player.id, remainingCount + index + 1])
+  );
 
-  let currentRank = activeBefore;
   const updatedPlayers = state.players.map((p) => {
-    if (!p.eliminated && p.chips <= 0) {
+    const finishRank = eliminationRanks.get(p.id);
+    if (finishRank !== undefined) {
       return {
         ...p,
         eliminated: true,
-        finishRank: currentRank--,
+        finishRank,
       };
     }
     return p;

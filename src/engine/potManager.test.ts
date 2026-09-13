@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Player } from './types';
-import { calculatePots } from './potManager';
+import { awardPots, calculatePots } from './potManager';
+import { createCard } from './deck';
+import { evaluateHand } from './pokerEvaluator';
 
 function contributor(id: string, totalHandBet: number, folded = false): Player {
   return {
@@ -15,6 +17,7 @@ function contributor(id: string, totalHandBet: number, folded = false): Player {
     folded,
     isAllIn: true,
     hasActedThisRound: true,
+    canRaise: false,
     eliminated: false,
     seatIndex: 0,
   };
@@ -45,5 +48,22 @@ describe('calculatePots', () => {
     expect(pots).toEqual([
       { amount: 3_000, eligiblePlayerIds: ['live-a', 'live-b'] },
     ]);
+  });
+
+  it('splits a tied pot without losing an odd chip', () => {
+    const tiedHand = evaluateHand([
+      createCard('A', '♠'),
+      createCard('K', '♥'),
+      createCard('Q', '♦'),
+      createCard('J', '♣'),
+      createCard('9', '♠'),
+    ]);
+    const awards = awardPots(
+      [{ amount: 1_001, eligiblePlayerIds: ['a', 'b'] }],
+      new Map([['a', tiedHand], ['b', tiedHand]])
+    );
+
+    expect(awards.reduce((sum, award) => sum + award.amount, 0)).toBe(1_001);
+    expect(awards.map((award) => award.amount)).toEqual([501, 500]);
   });
 });

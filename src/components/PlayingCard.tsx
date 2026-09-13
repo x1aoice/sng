@@ -24,13 +24,19 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const cardDimensions = {
     sm: 'w-[44px] h-[62px] rounded-lg',
     md: 'w-[50px] h-[72px] rounded-lg',
-    lg: 'w-[62px] h-[88px] rounded-xl',
+    lg: 'w-[42px] h-[60px] rounded-lg sm:w-[62px] sm:h-[88px] sm:rounded-xl',
   }[size];
 
   const faceUpPadding = {
     sm: 'pt-1 pl-1.5 pr-1 pb-1',
     md: 'pt-1.5 pl-2 pr-1.5 pb-1.5',
-    lg: 'pt-2.5 pl-2.5 pr-2 pb-2',
+    lg: 'pt-1.5 pl-1.5 pr-1 pb-1 sm:pt-2.5 sm:pl-2.5 sm:pr-2 sm:pb-2',
+  }[size];
+
+  const rankSize = {
+    sm: 'text-[14px]',
+    md: 'text-[16px]',
+    lg: 'text-[15px] sm:text-[20px]',
   }[size];
 
   const tiltClass =
@@ -82,11 +88,10 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       {/* Top-Left Corner Index with refined typographic hierarchy */}
       <div className="flex flex-col items-center leading-none self-start">
         <span
-          className={`font-bold tracking-tight leading-none ${
+          className={`${rankSize} font-bold tracking-tight leading-none ${
             isRed ? 'text-rose-600' : 'text-neutral-900'
           }`}
           style={{
-            fontSize: size === 'sm' ? '14px' : size === 'md' ? '16px' : '20px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif',
           }}
         >

@@ -51,6 +51,7 @@ export interface Player {
   folded: boolean;
   isAllIn: boolean;
   hasActedThisRound: boolean;
+  canRaise: boolean;         // false after acting until a full raise reopens betting
   eliminated: boolean;
   finishRank?: number;      // 1st, 2nd, ... 6th
   prizeWon?: number;        // Tournament payout prize ($42M for 1st, $18M for 2nd)
@@ -90,4 +91,3 @@ export interface HandLog {
   text: string;
   timestamp: string;
 }
-

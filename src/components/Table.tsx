@@ -69,7 +69,7 @@ export const Table: React.FC<TableProps> = ({
       >
         {/* Stadium Poker Table - Expansive 750px x 430px with classic 1.74:1 golden proportion */}
         <div
-          className="relative w-[750px] max-w-[92vw] h-[430px] max-h-[58vh] rounded-full bg-[#f5f5f7] border border-neutral-200/40 transition-all flex items-center justify-center"
+          className="relative w-[min(750px,82vw)] h-[240px] sm:w-[min(750px,92vw,101vh)] sm:h-auto sm:aspect-[750/430] rounded-full bg-[#f5f5f7] border border-neutral-200/40 transition-all flex items-center justify-center"
           style={{
             boxShadow: '0 2px 20px rgba(0, 0, 0, 0.025)',
           }}
@@ -107,7 +107,7 @@ export const Table: React.FC<TableProps> = ({
                     onClick={onStartNextHand}
                     className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
                   >
-                    <div className="bg-neutral-900 text-white text-[13px] font-medium px-5 py-2 rounded-full shadow-md flex items-center gap-2 group-hover:scale-[1.02] active:scale-95 transition-all">
+                    <div className="bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-2 rounded-2xl sm:rounded-full shadow-md flex items-center justify-center gap-2 max-w-[80vw] whitespace-normal text-center group-hover:scale-[1.02] active:scale-95 transition-all">
                       <span>{isHeroBusted ? '💀' : '🏆'}</span>
                       <span>{gameState.handResults[0].description}</span>
                       {isHeroBusted && (
@@ -164,7 +164,7 @@ export const Table: React.FC<TableProps> = ({
         </div>
 
         {/* Bottom Action Controls Area - Harmoniously spaced below Hero */}
-        <div className="w-full flex justify-center mt-16 sm:mt-20 z-30">
+        <div className="w-full flex justify-center mt-12 sm:mt-20 z-30">
           <ActionPanel
             hero={hero}
             pot={gameState.pot}

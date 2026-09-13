@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Player, ActionType } from '../engine/types';
 import { formatCurrency } from '../utils/format';
+import { getBettingBounds, isAllInTarget } from '../utils/betting';
 
 interface ActionPanelProps {
   hero: Player;
@@ -23,10 +24,11 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 }) => {
   const toCall = currentHighestBet - hero.currentBet;
   const canCheck = toCall <= 0;
-  const minBet = canCheck
-    ? Math.min(hero.chips, Math.max(minRaiseAmount, 100_000))
-    : Math.min(hero.chips, currentHighestBet + minRaiseAmount);
-  const maxBet = hero.chips + hero.currentBet;
+  const {
+    maxTarget: maxBet,
+    minTarget: minBet,
+    canIncreaseBet,
+  } = getBettingBounds(hero, currentHighestBet, minRaiseAmount);
 
   const [showSlider, setShowSlider] = useState<boolean>(false);
   const [sliderAmount, setSliderAmount] = useState<number>(minBet);
@@ -39,6 +41,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     gamePhase === 'hand_ended' ||
     gamePhase === 'idle' ||
     hero.folded ||
+    hero.isAllIn ||
     hero.eliminated;
 
   // Click outside blank area to close slider
@@ -117,7 +120,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
   const [sliderPercent, setSliderPercent] = useState<number>(50);
 
-  const isAllIn = sliderAmount >= maxBet || sliderAmount >= hero.chips;
+  const isAllIn = isAllInTarget(sliderAmount, maxBet);
   const actionBaseName = canCheck ? 'Bet' : 'Raise';
 
   const handleBlackButtonClick = () => {
@@ -213,7 +216,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
       {/* Main Action Buttons (Fold, Check/Call, Bet/Raise) - FIXED IN PLACE */}
       <div
-        className="flex items-center gap-2 bg-white/95 p-1.5 rounded-full border border-neutral-200/90 shadow-sm"
+        className="flex items-center gap-1 sm:gap-2 bg-white/95 p-1.5 rounded-full border border-neutral-200/90 shadow-sm"
         style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.05)' }}
       >
         {/* Fold Button */}
@@ -224,7 +227,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
             setShowSlider(false);
             onAction('fold');
           }}
-          className="px-6 py-2 rounded-full text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
+          className="px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
         >
           Fold
         </button>
@@ -238,7 +241,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               setShowSlider(false);
               onAction('check');
             }}
-            className="px-6 py-2 rounded-full text-xs font-semibold text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 border border-transparent hover:border-neutral-200 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
+            className="px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 border border-transparent hover:border-neutral-200 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             Check
           </button>
@@ -250,7 +253,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               setShowSlider(false);
               onAction('call');
             }}
-            className="px-6 py-2 rounded-full text-xs font-semibold text-neutral-800 hover:text-neutral-950 hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
+            className="px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold text-neutral-800 hover:text-neutral-950 hover:bg-neutral-50 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             Call {formatCurrency(toCall)}
           </button>
@@ -259,11 +262,13 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         {/* Primary Bet / Raise Button (Dark pill) */}
         <button
           type="button"
-          disabled={isDisabled}
+          disabled={isDisabled || !canIncreaseBet}
           onClick={handleBlackButtonClick}
-          className="px-6 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+          className="px-3 sm:px-6 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400"
         >
-          {showSlider ? (
+          {!canIncreaseBet ? (
+            <span>Raise Closed</span>
+          ) : showSlider ? (
             <>
               <span>{isAllIn ? 'All-in' : actionBaseName}</span>
               <span>{formatCurrency(sliderAmount)}</span>

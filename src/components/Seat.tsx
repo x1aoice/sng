@@ -24,6 +24,12 @@ export const Seat: React.FC<SeatProps> = ({
   const hasCards = player.cards.length === 2 && !player.folded && !player.eliminated;
   const isHero = player.isUser;
   const revealCards = (isHero || showCards) && hasCards;
+  const statusPositionClass =
+    player.seatIndex === 1 || player.seatIndex === 2
+      ? 'left-0'
+      : player.seatIndex === 4 || player.seatIndex === 5
+        ? 'right-0'
+        : 'left-1/2 -translate-x-1/2';
 
 
   // Calculate dealer button position:
@@ -57,8 +63,8 @@ export const Seat: React.FC<SeatProps> = ({
           <div
             className={`absolute z-0 pointer-events-none transition-all duration-300 flex ${
               revealCards
-                ? '-top-[50px] sm:-top-[54px] -space-x-3.5'
-                : '-top-8 sm:-top-[36px] -space-x-2.5'
+                ? '-top-[38px] sm:-top-[54px] -space-x-2.5 sm:-space-x-3.5'
+                : '-top-6 sm:-top-[36px] -space-x-2 sm:-space-x-2.5'
             }`}
           >
             <PlayingCard
@@ -79,7 +85,7 @@ export const Seat: React.FC<SeatProps> = ({
         {/* Main Seat Capsule - Tightly wrapped with symmetric padding */}
         <div className="relative flex items-center z-10">
           <div
-            className={`flex items-center gap-2.5 bg-white pl-1.5 pr-4 py-1.5 rounded-full border transition-all duration-300 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 sm:gap-2.5 bg-white pl-1 pr-2 sm:pl-1.5 sm:pr-4 py-1 sm:py-1.5 rounded-full border transition-all duration-300 whitespace-nowrap ${
               isCurrentTurn
                 ? 'border-sky-400 ring-2 ring-sky-100 shadow-md'
                 : 'border-neutral-200/80 shadow-xs'
@@ -91,17 +97,17 @@ export const Seat: React.FC<SeatProps> = ({
             }}
           >
             {/* High-end vector portrait avatar */}
-            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 shadow-2xs">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 shadow-2xs">
               <PlayerAvatar name={player.name} />
             </div>
 
             {/* Player Name and Chip Count */}
             <div className="flex flex-col text-left justify-center leading-none">
-              <span className="text-[13px] font-semibold text-neutral-900 tracking-tight leading-none">
+              <span className="text-[11px] sm:text-[13px] font-semibold text-neutral-900 tracking-tight leading-none">
                 {player.name}
               </span>
 
-              <span className="text-xs font-medium text-neutral-400 tracking-tight leading-none mt-1 whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs font-medium text-neutral-400 tracking-tight leading-none mt-0.5 sm:mt-1 whitespace-nowrap">
                 {player.eliminated
                   ? `Rank #${player.finishRank || 'Out'}`
                   : formatCurrency(player.chips)}
@@ -125,7 +131,7 @@ export const Seat: React.FC<SeatProps> = ({
 
         {/* Status Pill (Thinking, Bet, or Check) - positioned consistently directly under each player's capsule */}
         {isCurrentTurn && handPhase !== 'hand_ended' ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/95 px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] text-neutral-500 font-medium whitespace-nowrap z-20">
+          <div className={`absolute top-[calc(100%+6px)] ${statusPositionClass} flex items-center gap-1.5 bg-white/95 px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] text-neutral-500 font-medium whitespace-nowrap z-20`}>
             <span className="flex items-center gap-0.5 text-neutral-400">
               <span className="w-1 h-1 rounded-full bg-neutral-400 animate-pulse-dot" />
               <span className="w-1 h-1 rounded-full bg-neutral-400 animate-pulse-dot" style={{ animationDelay: '0.2s' }} />
@@ -144,12 +150,12 @@ export const Seat: React.FC<SeatProps> = ({
             </span>
           </div>
         ) : !player.folded && player.currentBet > 0 ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium whitespace-nowrap z-20">
+          <div className={`absolute top-[calc(100%+6px)] ${statusPositionClass} flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium whitespace-nowrap z-20`}>
             <span className="text-neutral-400 text-[11px]">{player.isAllIn ? 'All-in' : 'Bet'}</span>
             <span className="font-semibold text-neutral-900 text-[11px]">{formatCurrency(player.currentBet)}</span>
           </div>
         ) : !player.folded && player.lastAction?.type === 'check' ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center bg-white px-3 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium text-neutral-700 whitespace-nowrap z-20">
+          <div className={`absolute top-[calc(100%+6px)] ${statusPositionClass} flex items-center bg-white px-3 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium text-neutral-700 whitespace-nowrap z-20`}>
             Check
           </div>
         ) : null}
