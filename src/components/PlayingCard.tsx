@@ -46,7 +46,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Pure Minimalist White Card Back - Zero internal frames or boxes, single iconic logo */}
+        {/* Pure Minimalist White Card Back - Iconic Refined Kitsuné Fox Logo (Zero frames/borders) */}
         <svg
           viewBox={size === 'sm' ? '0 0 44 62' : '0 0 60 84'}
           className="w-full h-full text-neutral-900 select-none pointer-events-none"
@@ -55,32 +55,73 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           <g
             transform={
               size === 'sm'
-                ? 'translate(22, 27) scale(0.9)'
-                : 'translate(30, 42) scale(1.15)'
+                ? 'translate(22, 27) scale(0.95)'
+                : 'translate(30, 42) scale(1.25)'
             }
           >
-            {/* Iconic Radiant 8-Point Diamond Star Compass */}
-            <path
-              d={
+            {/* Geometric Fox Silhouette */}
+            <polygon
+              points={
                 size === 'sm'
-                  ? 'M 0,-11 Q 0,0 11,0 Q 0,0 0,11 Q 0,0 -11,0 Q 0,0 0,-11 Z'
-                  : 'M 0,-15 Q 0,0 15,0 Q 0,0 0,15 Q 0,0 -15,0 Q 0,0 0,-15 Z'
+                  ? '0,-7 8.5,-16 7.5,-3 14,3 0,16 -14,3 -7.5,-3 -8.5,-16'
+                  : '0,-8 9.5,-18 8.5,-4 15.5,3 0,18 -15.5,3 -8.5,-4 -9.5,-18'
               }
               fill="currentColor"
             />
-            {/* Secondary Negative-Space Faceted Rays */}
-            <path
-              d={
+            {/* White Ear Negative-Space Insets */}
+            <polygon
+              points={
                 size === 'sm'
-                  ? 'M 0,-6.5 Q 0,0 6.5,0 Q 0,0 0,6.5 Q 0,0 -6.5,0 Q 0,0 0,-6.5 Z'
-                  : 'M 0,-9 Q 0,0 9,0 Q 0,0 0,9 Q 0,0 -9,0 Q 0,0 0,-9 Z'
+                  ? '6.5,-12 5.5,-5 2.5,-7.5'
+                  : '7.5,-13 6.5,-5 3,-8'
               }
               fill="#ffffff"
-              transform="rotate(45)"
             />
-            {/* Center Core Jewel */}
-            <circle cx="0" cy="0" r={size === 'sm' ? 1.8 : 2.5} fill="currentColor" />
-            {size !== 'sm' && <circle cx="0" cy="0" r="1" fill="#ffffff" />}
+            <polygon
+              points={
+                size === 'sm'
+                  ? '-6.5,-12 -5.5,-5 -2.5,-7.5'
+                  : '-7.5,-13 -6.5,-5 -3,-8'
+              }
+              fill="#ffffff"
+            />
+            {/* Symmetrical White Cheek Masks */}
+            <polygon
+              points={
+                size === 'sm'
+                  ? '0,3 7,3 0,12.5'
+                  : '0,3.5 8,3.5 0,14'
+              }
+              fill="#ffffff"
+            />
+            <polygon
+              points={
+                size === 'sm'
+                  ? '0,3 -7,3 0,12.5'
+                  : '0,3.5 -8,3.5 0,14'
+              }
+              fill="#ffffff"
+            />
+            {/* Keen Fox Eyes */}
+            <circle
+              cx={size === 'sm' ? 3.5 : 4}
+              cy={size === 'sm' ? 1.5 : 1.8}
+              r={size === 'sm' ? 0.9 : 1.1}
+              fill="currentColor"
+            />
+            <circle
+              cx={size === 'sm' ? -3.5 : -4}
+              cy={size === 'sm' ? 1.5 : 1.8}
+              r={size === 'sm' ? 0.9 : 1.1}
+              fill="currentColor"
+            />
+            {/* Sleek Nose Tip */}
+            <circle
+              cx="0"
+              cy={size === 'sm' ? 13.5 : 15}
+              r={size === 'sm' ? 0.9 : 1.1}
+              fill="currentColor"
+            />
           </g>
         </svg>
       </div>
