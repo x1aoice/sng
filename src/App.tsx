@@ -8,74 +8,31 @@ import type { GameState } from './engine/gameEngine';
 import { decideBotActionWithLLM } from './services/llmService';
 import { Table } from './components/Table';
 import { HeaderHUD } from './components/HeaderHUD';
-import { HandLogDrawer } from './components/HandLogDrawer';
 import { GameOverModal } from './components/GameOverModal';
-import { sound } from './utils/sound';
-import { formatCurrency } from './utils/format';
-import type { ActionType, HandLog } from './engine/types';
+import type { ActionType } from './engine/types';
 
 export const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(createInitialGameState());
   const [isPaused, setIsPaused] = useState(false);
-  const [speed, setSpeed] = useState<number>(1);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => sound.isEnabled());
-  const [isLogsOpen, setIsLogsOpen] = useState(false);
-  const [handLogs, setHandLogs] = useState<HandLog[]>([]);
 
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
-
-  // Add a record to hand history logs
-  const addLog = useCallback((round: string, text: string) => {
-    const newLog: HandLog = {
-      id: Math.random().toString(36).substring(2, 9),
-      round,
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-    };
-    setHandLogs((prev) => [newLog, ...prev.slice(0, 49)]);
-  }, []);
 
   // Reset tournament
   const handleResetGame = useCallback(() => {
     setGameState(createInitialGameState());
     setIsPaused(false);
-    setHandLogs([]);
-  }, []);
-
-  // Sound toggle
-  const handleToggleSound = useCallback(() => {
-    setSoundEnabled((prev) => {
-      const next = !prev;
-      sound.setEnabled(next);
-      return next;
-    });
-  }, []);
-
-  // Speed toggle (1x / 2x)
-  const handleToggleSpeed = useCallback(() => {
-    setSpeed((prev) => (prev === 1 ? 2 : 1));
   }, []);
 
   // Start hand
   const handleStartNextHand = useCallback(() => {
-    setGameState((prev) => {
-      const next = startHand(prev);
-      addLog(`Hand #${next.handNumber} · START`, `Hand #${next.handNumber} dealt. Blinds posted.`);
-      return next;
-    });
-  }, [addLog]);
+    setGameState((prev) => startHand(prev));
+  }, []);
 
   // Handle hero user action
   const handleHeroAction = useCallback((action: ActionType, amount?: number) => {
-    const latest = gameStateRef.current;
-    const amountStr = amount ? ` $${formatCurrency(amount).replace('$', '')}` : '';
-    addLog(
-      `Hand #${latest.handNumber} · ${latest.phase.toUpperCase()}`,
-      `You: ${action.toUpperCase()}${amountStr}`
-    );
     setGameState((prev) => handlePlayerAction(prev, action, amount));
-  }, [addLog]);
+  }, []);
 
   // Automatically start next hand or tournament conclusion after a hand concludes
   useEffect(() => {
@@ -83,26 +40,14 @@ export const App: React.FC = () => {
 
     const hero = gameState.players.find((p) => p.isUser);
     const isHeroEliminated = hero ? (hero.eliminated || hero.chips <= 0) : false;
-    // If Hero was eliminated, transition to tournament results promptly; adjust for speed
-    const baseDelay = isHeroEliminated ? 1400 : 2200;
-    const autoDealDelay = Math.round(baseDelay / speed);
+    const autoDealDelay = isHeroEliminated ? 1400 : 2200;
 
     const timer = setTimeout(() => {
       setGameState((prev) => (prev.phase === 'hand_ended' ? startHand(prev) : prev));
     }, autoDealDelay);
 
     return () => clearTimeout(timer);
-  }, [gameState.phase, gameState.handNumber, isPaused, speed]);
-
-  // Log hand end results
-  useEffect(() => {
-    if (gameState.phase !== 'hand_ended') return;
-    if (gameState.handResults.length > 0) {
-      for (const res of gameState.handResults) {
-        addLog(`Hand #${gameState.handNumber} · SHOWDOWN`, res.description);
-      }
-    }
-  }, [gameState.phase, gameState.handNumber, addLog]);
+  }, [gameState.phase, gameState.handNumber, isPaused]);
 
   // 1. Universal 30-second turn countdown timer for active player (both Hero and Bots)
   useEffect(() => {
@@ -136,8 +81,7 @@ export const App: React.FC = () => {
       };
     });
 
-    // Tick every 1000ms adjusted for speed
-    const intervalMs = Math.round(1000 / speed);
+    // Tick every 1000ms
     const intervalId = setInterval(() => {
       setGameState((prev) => {
         if (prev.currentTurnSeat !== currentSeat) return prev;
@@ -156,10 +100,10 @@ export const App: React.FC = () => {
           ),
         };
       });
-    }, intervalMs);
+    }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [gameState.currentTurnSeat, gameState.phase, isPaused, speed]);
+  }, [gameState.currentTurnSeat, gameState.phase, isPaused]);
 
   // 2. Bot AI decision & realistic thinking pacing (powered by built-in FreeLLMAPI)
   useEffect(() => {
@@ -216,18 +160,13 @@ export const App: React.FC = () => {
       );
 
       const elapsed = performance.now() - startTime;
-      const waitRemaining = Math.max(0, Math.round((targetThinkMs - elapsed) / speed));
+      const waitRemaining = Math.max(0, targetThinkMs - elapsed);
 
       setTimeout(() => {
         if (isCancelled) return;
         const latest = gameStateRef.current;
         if (latest.currentTurnSeat !== currentSeat) return;
 
-        const amountStr = decision.amount ? ` $${formatCurrency(decision.amount).replace('$', '')}` : '';
-        addLog(
-          `Hand #${latest.handNumber} · ${latest.phase.toUpperCase()}`,
-          `${bot.name}: ${decision.action.toUpperCase()}${amountStr}`
-        );
         setGameState((prev) => handlePlayerAction(prev, decision.action, decision.amount));
       }, waitRemaining);
     })();
@@ -235,19 +174,13 @@ export const App: React.FC = () => {
     return () => {
       isCancelled = true;
     };
-  }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet, isPaused, speed, addLog]);
+  }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet, isPaused]);
 
   return (
     <div className="min-h-screen w-full bg-white text-neutral-900 flex flex-col justify-between items-center select-none relative overflow-x-hidden overflow-y-auto">
-      {/* Top Header HUD (Always visible blind level & controls) */}
+      {/* Top Header HUD (Purely Blind Level & Pause Button) */}
       <HeaderHUD
         gameState={gameState}
-        soundEnabled={soundEnabled}
-        onToggleSound={handleToggleSound}
-        speed={speed}
-        onToggleSpeed={handleToggleSpeed}
-        onResetGame={handleResetGame}
-        onToggleLogs={() => setIsLogsOpen(true)}
         isPaused={isPaused}
         onTogglePause={() => setIsPaused((prev) => !prev)}
       />
@@ -261,13 +194,6 @@ export const App: React.FC = () => {
           isPaused={isPaused}
         />
       </main>
-
-      {/* Hand History Drawer */}
-      <HandLogDrawer
-        isOpen={isLogsOpen}
-        onClose={() => setIsLogsOpen(false)}
-        logs={handLogs}
-      />
 
       {/* Game Over / Tournament Finished Modal */}
       {gameState.phase === 'tournament_ended' && (
