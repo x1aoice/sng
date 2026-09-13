@@ -46,7 +46,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Pure Minimalist White Card Back - Iconic Refined Kitsuné Fox Logo (Zero frames/borders) */}
+        {/* Pure Minimalist White Card Back - Dynamic Leaping Koi Fish Logo (Zero borders/frames) */}
         <svg
           viewBox={size === 'sm' ? '0 0 44 62' : '0 0 60 84'}
           className="w-full h-full text-neutral-900 select-none pointer-events-none"
@@ -55,73 +55,37 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           <g
             transform={
               size === 'sm'
-                ? 'translate(22, 27) scale(0.95)'
-                : 'translate(30, 42) scale(1.25)'
+                ? 'translate(22, 20) rotate(-25) scale(0.65)'
+                : 'translate(30, 42) rotate(-25) scale(0.95)'
             }
           >
-            {/* Geometric Fox Silhouette */}
-            <polygon
-              points={
-                size === 'sm'
-                  ? '0,-7 8.5,-16 7.5,-3 14,3 0,16 -14,3 -7.5,-3 -8.5,-16'
-                  : '0,-8 9.5,-18 8.5,-4 15.5,3 0,18 -15.5,3 -8.5,-4 -9.5,-18'
-              }
+            {/* Fluid arching body */}
+            <path
+              d="M 18,-1 C 13,-7 2,-10 -8,-7 C -16,-4 -22,0 -23,1 C -21,2 -15,7 -6,8 C 4,9 14,5 18,-1 Z"
               fill="currentColor"
             />
-            {/* White Ear Negative-Space Insets */}
-            <polygon
-              points={
-                size === 'sm'
-                  ? '6.5,-12 5.5,-5 2.5,-7.5'
-                  : '7.5,-13 6.5,-5 3,-8'
-              }
-              fill="#ffffff"
-            />
-            <polygon
-              points={
-                size === 'sm'
-                  ? '-6.5,-12 -5.5,-5 -2.5,-7.5'
-                  : '-7.5,-13 -6.5,-5 -3,-8'
-              }
-              fill="#ffffff"
-            />
-            {/* Symmetrical White Cheek Masks */}
-            <polygon
-              points={
-                size === 'sm'
-                  ? '0,3 7,3 0,12.5'
-                  : '0,3.5 8,3.5 0,14'
-              }
-              fill="#ffffff"
-            />
-            <polygon
-              points={
-                size === 'sm'
-                  ? '0,3 -7,3 0,12.5'
-                  : '0,3.5 -8,3.5 0,14'
-              }
-              fill="#ffffff"
-            />
-            {/* Keen Fox Eyes */}
-            <circle
-              cx={size === 'sm' ? 3.5 : 4}
-              cy={size === 'sm' ? 1.5 : 1.8}
-              r={size === 'sm' ? 0.9 : 1.1}
+            {/* Elegant sweeping tail */}
+            <path
+              d="M -21,1 C -25,-4 -30,-9 -34,-10 C -31,-3 -30,1 -31,1 C -30,1 -30,5 -33,12 C -29,9 -25,5 -21,1 Z"
               fill="currentColor"
             />
-            <circle
-              cx={size === 'sm' ? -3.5 : -4}
-              cy={size === 'sm' ? 1.5 : 1.8}
-              r={size === 'sm' ? 0.9 : 1.1}
+            {/* Swept dorsal fin */}
+            <path
+              d="M -4,-8 C 2,-15 10,-13 11,-5 C 5,-7 -1,-7 -4,-8 Z"
               fill="currentColor"
             />
-            {/* Sleek Nose Tip */}
-            <circle
-              cx="0"
-              cy={size === 'sm' ? 13.5 : 15}
-              r={size === 'sm' ? 0.9 : 1.1}
+            {/* Graceful pectoral fin */}
+            <path
+              d="M 5,6 C 3,12 -1,15 -4,14 C -3,11 2,7 5,6 Z"
               fill="currentColor"
             />
+            {/* Subtle ventral fin */}
+            <path
+              d="M -10,6 C -12,9 -15,10 -16,10 C -15,8 -12,6 -10,6 Z"
+              fill="currentColor"
+            />
+            {/* Negative-Space Eye */}
+            <circle cx="12" cy="-2.5" r="1.3" fill="#ffffff" />
           </g>
         </svg>
       </div>
