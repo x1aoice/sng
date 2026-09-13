@@ -5,14 +5,12 @@ import { Seat } from './Seat';
 import { CommunityCards } from './CommunityCards';
 import { ActionPanel } from './ActionPanel';
 import { formatCurrency } from '../utils/format';
-import { Play, Pause } from 'lucide-react';
 
 interface TableProps {
   gameState: GameState;
   onHeroAction: (action: ActionType, amount?: number) => void;
   onStartNextHand: () => void;
   isPaused: boolean;
-  onTogglePause: () => void;
 }
 
 export const Table: React.FC<TableProps> = ({
@@ -20,7 +18,6 @@ export const Table: React.FC<TableProps> = ({
   onHeroAction,
   onStartNextHand,
   isPaused,
-  onTogglePause,
 }) => {
   const hero = gameState.players[0]; // 'You' at seatIndex 0
   const isHeroTurn = gameState.currentTurnSeat === 0;
@@ -36,27 +33,7 @@ export const Table: React.FC<TableProps> = ({
   ];
 
   return (
-    <div className="relative w-full flex flex-col items-center justify-center select-none pt-10 sm:pt-12 pb-2">
-      {/* Top-Right Pure Minimalist Pause/Resume Icon Button */}
-      <div className="absolute top-2 right-4 sm:top-3 sm:right-6 z-40">
-        <button
-          type="button"
-          onClick={onTogglePause}
-          aria-label={isPaused ? 'Resume' : 'Pause'}
-          className={`w-8 h-8 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer flex items-center justify-center backdrop-blur-xs select-none ${
-            isPaused
-              ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs hover:bg-neutral-800'
-              : 'bg-white/95 hover:bg-white text-neutral-600 hover:text-neutral-900 border-neutral-200/90 hover:border-neutral-300 shadow-2xs hover:shadow-xs'
-          }`}
-        >
-          {isPaused ? (
-            <Play className="w-3.5 h-3.5 fill-current" />
-          ) : (
-            <Pause className="w-3.5 h-3.5 fill-current" />
-          )}
-        </button>
-      </div>
-
+    <div className="relative w-full flex flex-col items-center justify-center select-none pt-2 sm:pt-4 pb-2">
       {/* Main Game Area (Turns completely grayscale when paused) */}
       <div
         className={`w-full flex flex-col items-center justify-center transition-all duration-300 ${
