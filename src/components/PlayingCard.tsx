@@ -46,7 +46,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Pure Minimalist White Card Back - Dynamic Leaping Koi Fish Logo (Zero borders/frames) */}
+        {/* Pure Minimalist White Card Back - Cute Chibi Bubble Fish Logo (Zero borders/frames) */}
         <svg
           viewBox={size === 'sm' ? '0 0 44 62' : '0 0 60 84'}
           className="w-full h-full text-neutral-900 select-none pointer-events-none"
@@ -55,37 +55,38 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           <g
             transform={
               size === 'sm'
-                ? 'translate(22, 20) rotate(-25) scale(0.65)'
-                : 'translate(30, 42) rotate(-25) scale(0.95)'
+                ? 'translate(22, 19) scale(0.68)'
+                : 'translate(30, 42) scale(0.95)'
             }
           >
-            {/* Fluid arching body */}
+            {/* Cute Little Bubble with shine */}
+            <circle cx="16" cy="-10" r="1.8" fill="currentColor" />
+            <circle cx="16.5" cy="-10.5" r="0.6" fill="#ffffff" />
+            {/* Chubby Round Fish Body */}
             <path
-              d="M 18,-1 C 13,-7 2,-10 -8,-7 C -16,-4 -22,0 -23,1 C -21,2 -15,7 -6,8 C 4,9 14,5 18,-1 Z"
+              d="M 12,-1 C 12,-9 1,-13 -8,-10 C -16,-7 -18,-2 -19,1 C -18,4 -15,10 -7,10 C 2,10 12,6 12,-1 Z"
               fill="currentColor"
             />
-            {/* Elegant sweeping tail */}
+            {/* Cute Butterfly/Scallop Tail */}
             <path
-              d="M -21,1 C -25,-4 -30,-9 -34,-10 C -31,-3 -30,1 -31,1 C -30,1 -30,5 -33,12 C -29,9 -25,5 -21,1 Z"
+              d="M -17,1 C -21,-4 -26,-7 -29,-6 C -27,-1 -25,1 -27,3 C -25,3 -23,4 -21,6 C -20,4 -18,2 -17,1 Z"
               fill="currentColor"
             />
-            {/* Swept dorsal fin */}
+            {/* Adorable Dorsal Fin */}
             <path
-              d="M -4,-8 C 2,-15 10,-13 11,-5 C 5,-7 -1,-7 -4,-8 Z"
+              d="M -3,-10 C 0,-14 5,-14 6,-9 C 2,-10 0,-10 -3,-10 Z"
               fill="currentColor"
             />
-            {/* Graceful pectoral fin */}
-            <path
-              d="M 5,6 C 3,12 -1,15 -4,14 C -3,11 2,7 5,6 Z"
-              fill="currentColor"
-            />
-            {/* Subtle ventral fin */}
-            <path
-              d="M -10,6 C -12,9 -15,10 -16,10 C -15,8 -12,6 -10,6 Z"
-              fill="currentColor"
-            />
-            {/* Negative-Space Eye */}
-            <circle cx="12" cy="-2.5" r="1.3" fill="#ffffff" />
+            {/* Flutter Pectoral Fin with negative space */}
+            <ellipse cx="-1" cy="4" rx="4" ry="2.2" transform="rotate(-30 -1 4)" fill="#ffffff" />
+            <ellipse cx="-1.5" cy="4" rx="2.8" ry="1.5" transform="rotate(-30 -1.5 4)" fill="currentColor" />
+            {/* Giant Sparkly Anime Chibi Eye */}
+            <circle cx="4.5" cy="-2.5" r="3.6" fill="#ffffff" />
+            <circle cx="5.2" cy="-2.5" r="2.4" fill="currentColor" />
+            <circle cx="6.2" cy="-3.3" r="1.0" fill="#ffffff" />
+            <circle cx="4.2" cy="-1.5" r="0.5" fill="#ffffff" />
+            {/* Cute Pout Mouth */}
+            <path d="M 12,-2 C 14,-1.5 14,-0.5 12,0 Z" fill="currentColor" />
           </g>
         </svg>
       </div>
