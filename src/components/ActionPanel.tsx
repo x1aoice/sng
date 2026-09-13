@@ -41,13 +41,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     hero.folded ||
     hero.eliminated;
 
-  // Auto-close slider when disabled
-  useEffect(() => {
-    if (isDisabled) {
-      setShowSlider(false);
-    }
-  }, [isDisabled, gamePhase]);
-
   // Click outside blank area to close slider
   useEffect(() => {
     if (!showSlider) return;
@@ -124,20 +117,15 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
   const [sliderPercent, setSliderPercent] = useState<number>(50);
 
-  // Recalculate default slider amount when turn changes or pot changes (default 1/2 Pot)
-  useEffect(() => {
-    const steps = getMilestones();
-    const defaultPct = 50; // 1/2 Pot
-    setSliderPercent(defaultPct);
-    setSliderAmount(steps[2].amount);
-  }, [pot, minBet, maxBet, isHeroTurn]);
-
   const isAllIn = sliderAmount >= maxBet || sliderAmount >= hero.chips;
   const actionBaseName = canCheck ? 'Bet' : 'Raise';
 
   const handleBlackButtonClick = () => {
     if (isDisabled) return;
     if (!showSlider) {
+      const defaultPercent = 50;
+      setSliderPercent(defaultPercent);
+      setSliderAmount(milestones[2].amount);
       setShowSlider(true);
     } else {
       if (isAllIn) {

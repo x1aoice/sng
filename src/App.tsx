@@ -15,7 +15,10 @@ export const App: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
 
   const gameStateRef = useRef(gameState);
-  gameStateRef.current = gameState;
+
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   // Reset tournament
   const handleResetGame = useCallback(() => {
@@ -46,7 +49,7 @@ export const App: React.FC = () => {
     }, autoDealDelay);
 
     return () => clearTimeout(timer);
-  }, [gameState.phase, gameState.handNumber, isPaused]);
+  }, [gameState.phase, gameState.handNumber, gameState.players, isPaused]);
 
   // 1. Universal 30-second turn countdown timer for active player (both Hero and Bots)
   useEffect(() => {
@@ -61,24 +64,6 @@ export const App: React.FC = () => {
     ) {
       return;
     }
-
-    const currentPlayer = gameState.players[currentSeat];
-    if (!currentPlayer || currentPlayer.folded || currentPlayer.eliminated || currentPlayer.isAllIn) {
-      return;
-    }
-
-    // Set 30-second time-bank when turn begins
-    setGameState((prev) => {
-      if (prev.currentTurnSeat !== currentSeat) return prev;
-      const p = prev.players[currentSeat];
-      if (p.isThinking && p.thinkingSeconds !== undefined) return prev;
-      return {
-        ...prev,
-        players: prev.players.map((pl, idx) =>
-          idx === currentSeat ? { ...pl, isThinking: true, thinkingSeconds: 30 } : pl
-        ),
-      };
-    });
 
     // Tick every 1000ms
     const intervalId = setInterval(() => {
@@ -173,6 +158,9 @@ export const App: React.FC = () => {
     return () => {
       isCancelled = true;
     };
+    // Countdown-only player updates must not restart an in-flight LLM request.
+    // The turn/phase/bet fields below are the decision boundaries for this effect.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet, isPaused]);
 
   return (

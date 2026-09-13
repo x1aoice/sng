@@ -2,7 +2,7 @@
 
 A high-speed, modern 6-player **Hyper Sit & Go** Texas Hold'em tournament web game built with React 19, TypeScript, Tailwind CSS v4, and Vite.
 
-Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, short-stack GTO Push/Fold AI opponents, Web Audio sound effects, and high-impact showdown card animations.
+Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, personality-driven LLM opponents, recorded casino sound effects, and high-impact showdown card animations.
 
 ---
 
@@ -20,9 +20,9 @@ Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, shor
     - 🥇 **1st Place**: $42,000,000 ($42M · 70%)
     - 🥈 **2nd Place**: $18,000,000 ($18M · 30%)
 
-- **🤖 Intelligent Short-Stack GTO AI**
-  - Bot opponents dynamically adjust to stack depth.
-  - Switches to GTO Push/Fold shove/call charts when stack drops below 10 BB and 5 BB.
+- **🤖 Personality-Driven LLM Opponents**
+  - Each bot receives its own playing-style prompt and the current table state.
+  - Invalid, unavailable, or timed-out model responses fall back to safe poker actions.
 
 - **🎴 Dynamic Showdown Card Reveal**
   - Opponents' hole cards remain neat and compact while face-down during betting.
@@ -34,8 +34,8 @@ Features a clean, minimalist design aesthetic, hand-by-hand blind doubling, shor
   - Seamless responsive slider bet control with min/max, 2.5BB, half-pot, and all-in shortcuts.
   - Interactive hand log drawer and instant auto-deal progression.
 
-- **🔊 Synthesized Web Audio Sound Effects**
-  - Zero-latency procedural sound generation (chip clicks, card shuffles/flips, win chimes) using the browser's native Web Audio API — no external audio files required.
+- **🔊 Recorded Casino Sound Effects**
+  - Local MP3 assets are preloaded and played through Web Audio, with an HTML Audio fallback.
 
 - **⏱ 30-Second Turn Countdown**
   - Realistic time-bank indicator for both human player and AI bots.
@@ -81,6 +81,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ```bash
 npm run build
+npm test
 npm run preview
 ```
 

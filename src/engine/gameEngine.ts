@@ -187,6 +187,16 @@ export function countPlayers(
   }).length;
 }
 
+function setThinkingPlayer(players: Player[], seat: number | null): Player[] {
+  if (seat === null) return players;
+
+  return players.map((player, index) =>
+    index === seat
+      ? { ...player, isThinking: true, thinkingSeconds: 30 }
+      : player
+  );
+}
+
 export function startHand(state: GameState): GameState {
   const hero = state.players.find((p) => p.isUser);
   const activePlayers = state.players.filter((p) => !p.eliminated);
@@ -309,7 +319,7 @@ export function startHand(state: GameState): GameState {
 
   return {
     ...state,
-    players: updatedPlayers,
+    players: setThinkingPlayer(updatedPlayers, firstTurn),
     communityCards: [],
     deck,
     pot,
@@ -346,14 +356,49 @@ export function handlePlayerAction(
   const updatedPlayers = state.players.map((pl) => ({ ...pl }));
   const p = updatedPlayers[currentSeat];
 
+  if (!p || p.folded || p.eliminated || p.isAllIn) {
+    return state;
+  }
+
   let pot = state.pot;
   let currentHighestBet = state.currentHighestBet;
   let minRaiseAmount = state.minRaiseAmount;
   let logText = '';
 
-  const toCall = currentHighestBet - p.currentBet;
+  const toCall = Math.max(0, currentHighestBet - p.currentBet);
+  let normalizedAction = action;
+  let normalizedAmount = amount;
 
-  switch (action) {
+  if (normalizedAction === 'check' && toCall > 0) {
+    normalizedAction = 'call';
+  } else if (normalizedAction === 'call' && toCall === 0) {
+    normalizedAction = 'check';
+  }
+
+  if (normalizedAction === 'bet' || normalizedAction === 'raise') {
+    normalizedAction = currentHighestBet > 0 ? 'raise' : 'bet';
+
+    const maxTarget = p.currentBet + p.chips;
+    const minTarget = currentHighestBet > 0
+      ? currentHighestBet + minRaiseAmount
+      : Math.max(minRaiseAmount, 1);
+
+    if (maxTarget <= currentHighestBet) {
+      normalizedAction = toCall > 0 ? 'call' : 'check';
+      normalizedAmount = undefined;
+    } else if (maxTarget < minTarget) {
+      normalizedAction = 'allin';
+      normalizedAmount = undefined;
+    } else {
+      const requestedTarget =
+        typeof normalizedAmount === 'number' && Number.isFinite(normalizedAmount)
+          ? normalizedAmount
+          : minTarget;
+      normalizedAmount = Math.max(minTarget, Math.min(maxTarget, requestedTarget));
+    }
+  }
+
+  switch (normalizedAction) {
     case 'fold': {
       p.folded = true;
       p.lastAction = { type: 'fold', text: 'Fold' };
@@ -384,7 +429,7 @@ export function handlePlayerAction(
 
     case 'bet':
     case 'raise': {
-      const targetBet = amount || currentHighestBet + minRaiseAmount;
+      const targetBet = normalizedAmount!;
       const additionalChips = targetBet - p.currentBet;
       const actualBet = Math.min(p.chips, additionalChips);
 
@@ -403,9 +448,9 @@ export function handlePlayerAction(
 
       if (p.chips === 0) p.isAllIn = true;
 
-      const actName = action === 'bet' ? 'Bet' : 'Raise';
+      const actName = normalizedAction === 'bet' ? 'Bet' : 'Raise';
       p.lastAction = {
-        type: action,
+        type: normalizedAction,
         amount: newBetTotal,
         text: `${actName} ${formatTokens(newBetTotal)}`,
       };
@@ -505,6 +550,7 @@ export function progressGameRound(state: GameState): GameState {
     const nextTurn = getNextActiveSeat(state.players, state.currentTurnSeat!, 'canAct');
     return {
       ...state,
+      players: setThinkingPlayer(state.players, nextTurn),
       currentTurnSeat: nextTurn,
     };
   }
@@ -535,7 +581,7 @@ export function advanceToNextPhase(state: GameState): GameState {
 
     const nextState: GameState = {
       ...state,
-      players: updatedPlayers,
+      players: setThinkingPlayer(updatedPlayers, firstTurn),
       deck,
       communityCards,
       currentHighestBet: 0,
@@ -561,7 +607,7 @@ export function advanceToNextPhase(state: GameState): GameState {
 
     const nextState: GameState = {
       ...state,
-      players: updatedPlayers,
+      players: setThinkingPlayer(updatedPlayers, firstTurn),
       deck,
       communityCards,
       currentHighestBet: 0,
@@ -587,7 +633,7 @@ export function advanceToNextPhase(state: GameState): GameState {
 
     const nextState: GameState = {
       ...state,
-      players: updatedPlayers,
+      players: setThinkingPlayer(updatedPlayers, firstTurn),
       deck,
       communityCards,
       currentHighestBet: 0,
