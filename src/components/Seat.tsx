@@ -58,7 +58,7 @@ export const Seat: React.FC<SeatProps> = ({
             className={`absolute z-0 pointer-events-none transition-all duration-300 flex ${
               revealCards
                 ? '-top-[50px] sm:-top-[54px] -space-x-3.5'
-                : '-top-7 sm:-top-[32px] -space-x-2.5'
+                : '-top-8 sm:-top-[36px] -space-x-2.5'
             }`}
           >
             <PlayingCard

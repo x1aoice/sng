@@ -7,9 +7,8 @@ interface CommunityCardsProps {
   phase: string;
 }
 
-export const CommunityCards: React.FC<CommunityCardsProps> = ({ cards, phase }) => {
+export const CommunityCards: React.FC<CommunityCardsProps> = ({ cards }) => {
   const slots = [0, 1, 2, 3, 4];
-  const isActive = phase !== 'idle';
 
   return (
     <div className="flex items-center gap-2 sm:gap-2.5">
@@ -26,15 +25,7 @@ export const CommunityCards: React.FC<CommunityCardsProps> = ({ cards, phase }) 
           );
         }
 
-        if (isActive) {
-          return (
-            <PlayingCard
-              key={`comm-empty-${idx}`}
-              faceDown={true}
-              size="lg"
-            />
-          );
-        }
+
 
         return (
           <div

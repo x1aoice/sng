@@ -41,8 +41,8 @@ export const Table: React.FC<TableProps> = ({
 
   return (
     <div className="relative w-full flex flex-col items-center justify-center select-none pt-6 sm:pt-8 pb-2">
-      {/* Top-Right Pure Minimalist Pause/Resume Icon Button */}
-      <div className="absolute top-2 right-4 sm:top-3 sm:right-6 z-40">
+      {/* Top-Right Pure Minimalist Floating Pause/Resume Icon Button */}
+      <div className="fixed top-4 right-4 sm:top-5 sm:right-6 z-50">
         <button
           type="button"
           onClick={onTogglePause}

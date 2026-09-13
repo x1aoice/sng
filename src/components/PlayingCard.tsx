@@ -41,31 +41,59 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
       <div
         className={`relative ${cardDimensions} ${tiltClass} ${className} ${
           dimmed ? 'opacity-40 grayscale' : 'opacity-100'
-        } bg-white border border-neutral-200/90 shadow-sm flex items-center justify-center transition-all duration-300 select-none overflow-hidden p-0`}
+        } bg-[#18181b] text-white border border-neutral-800/90 shadow-sm flex items-center justify-center transition-all duration-300 select-none overflow-hidden p-0`}
         style={{
-          boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 8px -1px rgba(0,0,0,0.18), 0 1px 3px -1px rgba(0,0,0,0.12)',
         }}
       >
-        {/* Minimalist Central Emblem - Modern Star Compass */}
+        {/* Luxury Modern Apex Sovereign Spade Card Back */}
         <svg
-          viewBox="0 0 24 24"
-          className={`${
-            size === 'lg' ? 'w-6 h-6' : size === 'md' ? 'w-5 h-5' : 'w-4 h-4'
-          } text-neutral-800 select-none`}
+          viewBox="0 0 60 84"
+          className="w-full h-full text-white select-none pointer-events-none"
           fill="none"
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          strokeLinejoin="round"
         >
-          {/* Subtle geometric star contour */}
-          <path
-            d="M12 2 Q12 12 22 12 Q12 12 12 22 Q12 12 2 12 Q12 12 12 2 Z"
-            fill="currentColor"
-            fillOpacity="0.08"
+          {/* Refined Inset Border */}
+          <rect
+            x="3.5"
+            y="3.5"
+            width="53"
+            height="77"
+            rx={size === 'lg' ? 7 : 5}
+            stroke="currentColor"
+            strokeWidth="0.8"
+            strokeOpacity="0.25"
           />
-          {/* Center core gem */}
-          <circle cx="12" cy="12" r="1.75" fill="currentColor" stroke="none" />
+
+          {/* Corner Diamond Pips (for medium & large cards) */}
+          {size !== 'sm' && (
+            <>
+              <polygon points="7,7 8.5,8.5 7,10 5.5,8.5" fill="currentColor" fillOpacity="0.35" />
+              <polygon points="53,7 54.5,8.5 53,10 51.5,8.5" fill="currentColor" fillOpacity="0.35" />
+              <polygon points="7,77 8.5,75.5 7,74 5.5,75.5" fill="currentColor" fillOpacity="0.35" />
+              <polygon points="53,77 54.5,75.5 53,74 51.5,75.5" fill="currentColor" fillOpacity="0.35" />
+              {/* Concentric Medallion Rings */}
+              <circle cx="30" cy="42" r="21" stroke="currentColor" strokeWidth="0.6" strokeOpacity="0.2" />
+              <circle cx="30" cy="42" r="18" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 1.5" strokeOpacity="0.3" />
+            </>
+          )}
+
+          {/* Center Master Apex Spade */}
+          <g transform={`translate(30, ${size === 'sm' ? 34 : 42}) ${size === 'sm' ? 'scale(0.85)' : 'scale(1)'}`}>
+            {/* Spade Outer Body */}
+            <path
+              d="M 0,-18 C -3,-11 -15,-2 -15,7 C -15,14 -10,18 -3.5,18 C -1,18 0,16.5 0,16.5 C 0,16.5 1,18 3.5,18 C 10,18 15,14 15,7 C 15,-2 3,-11 0,-18 Z"
+              fill="currentColor"
+            />
+            {/* Geometric Stem */}
+            <path d="M -2,16.5 L -4,22 L 4,22 L 2,16.5 Z" fill="currentColor" />
+            {/* Center Chiseled Facet Division */}
+            <path d="M 0,-17 L 0,16" stroke="#18181b" strokeWidth="0.8" strokeOpacity="0.6" />
+            {/* Radiant Negative-Space Star Gem Core */}
+            <path
+              d="M 0,-4.5 Q 0,0 4.5,0 Q 0,0 0,4.5 Q 0,0 -4.5,0 Q 0,0 0,-4.5 Z"
+              fill="#18181b"
+            />
+          </g>
         </svg>
       </div>
     );
