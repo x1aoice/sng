@@ -46,110 +46,41 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
         }}
       >
-        {/* Luxury Modern Ribbon Ace Card Back - 100% White Stock */}
+        {/* Pure Minimalist White Card Back - Zero internal frames or boxes, single iconic logo */}
         <svg
-          viewBox="0 0 60 84"
+          viewBox={size === 'sm' ? '0 0 44 62' : '0 0 60 84'}
           className="w-full h-full text-neutral-900 select-none pointer-events-none"
           fill="none"
         >
-          {/* Refined Inset Border */}
-          <rect
-            x="3.5"
-            y="3.5"
-            width="53"
-            height="77"
-            rx={size === 'lg' ? 7 : 5}
-            stroke="currentColor"
-            strokeWidth="0.75"
-            strokeOpacity="0.22"
-          />
-
-          {/* Medium & Large Card Luxury Flourishes */}
-          {size !== 'sm' && (
-            <>
-              <rect
-                x="6"
-                y="6"
-                width="48"
-                height="72"
-                rx="6"
-                stroke="currentColor"
-                strokeWidth="0.4"
-                strokeOpacity="0.12"
-              />
-              {/* Corner Diamond Pips */}
-              <polygon points="8.5,7 9.5,8.5 8.5,10 7.5,8.5" fill="currentColor" fillOpacity="0.25" />
-              <polygon points="51.5,7 52.5,8.5 51.5,10 50.5,8.5" fill="currentColor" fillOpacity="0.25" />
-              <polygon points="8.5,74 9.5,75.5 8.5,77 7.5,75.5" fill="currentColor" fillOpacity="0.25" />
-              <polygon points="51.5,74 52.5,75.5 51.5,77 50.5,75.5" fill="currentColor" fillOpacity="0.25" />
-              {/* Concentric Medallion Rings */}
-              <circle cx="30" cy="42" r="20" stroke="currentColor" strokeWidth="0.6" strokeOpacity="0.16" />
-              <circle cx="30" cy="42" r="17" stroke="currentColor" strokeWidth="0.4" strokeDasharray="1 1.5" strokeOpacity="0.22" />
-            </>
-          )}
-
-          {/* Swiss Starburst Compass Logo - Clean Luxury Geometry */}
-          <g transform={`translate(30, ${size === 'sm' ? 34 : 42})`}>
-            {/* Concentric Bezel Seal Rings */}
-            <circle
-              cx="0"
-              cy="0"
-              r={size === 'sm' ? 12 : 18}
-              stroke="currentColor"
-              strokeWidth={size === 'sm' ? 0.6 : 0.75}
-              strokeOpacity={size === 'sm' ? 0.22 : 0.2}
-            />
-            <circle
-              cx="0"
-              cy="0"
-              r={size === 'sm' ? 10 : 15}
-              stroke="currentColor"
-              strokeWidth="0.4"
-              strokeDasharray="0.8 1.2"
-              strokeOpacity={size === 'sm' ? 0.18 : 0.18}
-            />
-
-            {/* Subtle Cross-hair Axis */}
-            <line
-              x1={size === 'sm' ? -12 : -18}
-              y1={0}
-              x2={size === 'sm' ? 12 : 18}
-              y2={0}
-              stroke="currentColor"
-              strokeWidth={size === 'sm' ? 0.5 : 0.6}
-              strokeOpacity={size === 'sm' ? 0.2 : 0.25}
-            />
-            <line
-              x1={0}
-              y1={size === 'sm' ? -12 : -18}
-              x2={0}
-              y2={size === 'sm' ? 12 : 18}
-              stroke="currentColor"
-              strokeWidth={size === 'sm' ? 0.5 : 0.6}
-              strokeOpacity={size === 'sm' ? 0.2 : 0.25}
-            />
-            {/* Primary 8-Point Sharp Star */}
+          <g
+            transform={
+              size === 'sm'
+                ? 'translate(22, 27) scale(0.9)'
+                : 'translate(30, 42) scale(1.15)'
+            }
+          >
+            {/* Iconic Radiant 8-Point Diamond Star Compass */}
             <path
               d={
                 size === 'sm'
-                  ? 'M 0,-9 Q 0,0 9,0 Q 0,0 0,9 Q 0,0 -9,0 Q 0,0 0,-9 Z'
-                  : 'M 0,-13 Q 0,0 13,0 Q 0,0 0,13 Q 0,0 -13,0 Q 0,0 0,-13 Z'
+                  ? 'M 0,-11 Q 0,0 11,0 Q 0,0 0,11 Q 0,0 -11,0 Q 0,0 0,-11 Z'
+                  : 'M 0,-15 Q 0,0 15,0 Q 0,0 0,15 Q 0,0 -15,0 Q 0,0 0,-15 Z'
               }
               fill="currentColor"
             />
-            {/* Secondary Rotated Facet Rays */}
+            {/* Secondary Negative-Space Faceted Rays */}
             <path
               d={
                 size === 'sm'
-                  ? 'M 0,-5.5 Q 0,0 5.5,0 Q 0,0 0,5.5 Q 0,0 -5.5,0 Q 0,0 0,-5.5 Z'
-                  : 'M 0,-8 Q 0,0 8,0 Q 0,0 0,8 Q 0,0 -8,0 Q 0,0 0,-8 Z'
+                  ? 'M 0,-6.5 Q 0,0 6.5,0 Q 0,0 0,6.5 Q 0,0 -6.5,0 Q 0,0 0,-6.5 Z'
+                  : 'M 0,-9 Q 0,0 9,0 Q 0,0 0,9 Q 0,0 -9,0 Q 0,0 0,-9 Z'
               }
               fill="#ffffff"
               transform="rotate(45)"
             />
-            {/* Core Gem */}
-            <circle cx="0" cy="0" r={size === 'sm' ? 1.5 : 2} fill="currentColor" />
-            {size !== 'sm' && <circle cx="0" cy="0" r="0.8" fill="#ffffff" />}
+            {/* Center Core Jewel */}
+            <circle cx="0" cy="0" r={size === 'sm' ? 1.8 : 2.5} fill="currentColor" />
+            {size !== 'sm' && <circle cx="0" cy="0" r="1" fill="#ffffff" />}
           </g>
         </svg>
       </div>
