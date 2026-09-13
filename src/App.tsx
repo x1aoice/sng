@@ -7,7 +7,6 @@ import {
 import type { GameState } from './engine/gameEngine';
 import { decideBotActionWithLLM } from './services/llmService';
 import { Table } from './components/Table';
-import { HeaderHUD } from './components/HeaderHUD';
 import { GameOverModal } from './components/GameOverModal';
 import type { ActionType } from './engine/types';
 
@@ -177,21 +176,15 @@ export const App: React.FC = () => {
   }, [gameState.currentTurnSeat, gameState.phase, gameState.pot, gameState.currentHighestBet, isPaused]);
 
   return (
-    <div className="min-h-screen w-full bg-white text-neutral-900 flex flex-col justify-between items-center select-none relative overflow-x-hidden overflow-y-auto">
-      {/* Top Header HUD (Purely Blind Level & Pause Button) */}
-      <HeaderHUD
-        gameState={gameState}
-        isPaused={isPaused}
-        onTogglePause={() => setIsPaused((prev) => !prev)}
-      />
-
-      {/* Main Poker Arena - purely centered table and controls with 0 clutter */}
-      <main className="w-full flex-1 flex items-center justify-center p-2 sm:p-4 my-auto">
+    <div className="min-h-screen w-full bg-white text-neutral-900 flex flex-col justify-center items-center select-none relative overflow-x-hidden overflow-y-auto p-4 sm:p-6">
+      {/* Main Poker Arena - purely centered table with 0 clutter */}
+      <main className="w-full flex items-center justify-center my-auto">
         <Table
           gameState={gameState}
           onHeroAction={handleHeroAction}
           onStartNextHand={handleStartNextHand}
           isPaused={isPaused}
+          onTogglePause={() => setIsPaused((prev) => !prev)}
         />
       </main>
 
