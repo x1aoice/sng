@@ -118,7 +118,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     return steps[steps.length - 1].amount;
   };
 
-  const [sliderPercent, setSliderPercent] = useState<number>(50);
+  const [sliderPercent, setSliderPercent] = useState<number>(0);
 
   const isAllIn = isAllInTarget(sliderAmount, maxBet);
   const actionBaseName = canCheck ? 'Bet' : 'Raise';
@@ -126,9 +126,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const handleBlackButtonClick = () => {
     if (isDisabled) return;
     if (!showSlider) {
-      const defaultPercent = 50;
+      const defaultPercent = 0;
       setSliderPercent(defaultPercent);
-      setSliderAmount(milestones[2].amount);
+      setSliderAmount(milestones[0].amount);
       setShowSlider(true);
     } else {
       if (isAllIn) {
