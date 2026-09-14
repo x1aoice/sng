@@ -153,27 +153,16 @@ export const Table: React.FC<TableProps> = ({
                 return (
                   <div
                     onClick={onStartNextHand}
-                    className="flex flex-col items-center animate-banner-spring cursor-pointer group select-none relative"
+                    className="flex flex-col items-center animate-banner-spring cursor-pointer group select-none"
                   >
-                    <div className="relative overflow-hidden bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-lg flex items-center justify-center gap-2 max-w-[90vw] whitespace-nowrap group-hover:scale-[1.02] active:scale-95 transition-all">
+                    <div className="bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-1.5 sm:py-2 rounded-full shadow-md flex items-center justify-center gap-2 max-w-[90vw] whitespace-nowrap group-hover:scale-[1.02] active:scale-95 transition-all">
                       <span>{isHeroBusted ? '💀' : isHeroWinner ? '🏆' : '✨'}</span>
                       <span className="tracking-tight">{resultText}</span>
-                      {isHeroBusted ? (
+                      {isHeroBusted && (
                         <span className="text-neutral-400 text-xs font-normal border-l border-neutral-700 pl-2">
                           Eliminated · View Results
                         </span>
-                      ) : (
-                        <span className="text-neutral-400 text-[10px] font-normal border-l border-neutral-700 pl-2 group-hover:text-white transition-colors">
-                          Tap to skip
-                        </span>
                       )}
-                      {/* Countdown indicator bar across bottom of pill */}
-                      <div
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-400 via-indigo-400 to-amber-400 opacity-80"
-                        style={{
-                          animation: `progress-countdown ${isHeroBusted ? 1.4 : 2.2}s linear forwards`,
-                        }}
-                      />
                     </div>
                   </div>
                 );
