@@ -60,37 +60,25 @@
   100% { background-position: 0% 50%; }
 }
 
-@keyframes allin-heat-pulse {
-  0%, 100% {
-    opacity: 0.9;
-    filter: drop-shadow(0 0 3px rgba(244, 63, 94, 0.4));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(225, 29, 72, 0.7));
-  }
-}
-
-@keyframes allin-ember-drift {
-  0% { transform: translateX(0) translateY(0); opacity: 0; }
-  25% { opacity: 0.85; }
-  75% { opacity: 0.85; }
-  100% { transform: translateX(140px) translateY(-2px); opacity: 0; }
-}
-
 @keyframes allin-button-pulse {
   0%, 100% {
     box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35);
   }
   50% {
-    box-shadow: 0 4px 22px rgba(225, 29, 72, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.55);
+    box-shadow: 0 4px 20px rgba(225, 29, 72, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5);
   }
+}
+
+@keyframes allin-ember-drift {
+  0% { transform: translateX(0) scale(0.85); opacity: 0.35; }
+  50% { transform: translateX(10px) scale(1.1); opacity: 0.8; }
+  100% { transform: translateX(20px) scale(0.85); opacity: 0.35; }
 }
 
 .allin-molten-track {
   background: linear-gradient(90deg, #991b1b 0%, #dc2626 22%, #f43f5e 45%, #fb7185 62%, #e11d48 80%, #991b1b 100%);
   background-size: 240% 100%;
-  animation: allin-flame-flow 3s ease infinite, allin-heat-pulse 2s ease-in-out infinite;
+  animation: allin-flame-flow 3s ease infinite;
 }
 
 .allin-btn-active {

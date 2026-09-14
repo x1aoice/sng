@@ -126,11 +126,16 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
   const sliderBoxRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const trackRectRef = useRef<{ left: number; width: number } | null>(null);
 
   const updateFromPointer = (clientX: number) => {
-    if (!sliderBoxRef.current) return;
-    const rect = sliderBoxRef.current.getBoundingClientRect();
-    if (rect.width <= 0) return;
+    let rect = trackRectRef.current;
+    if (!rect && sliderBoxRef.current) {
+      const r = sliderBoxRef.current.getBoundingClientRect();
+      rect = { left: r.left, width: r.width };
+      trackRectRef.current = rect;
+    }
+    if (!rect || rect.width <= 0) return;
 
     // Track interior: thumb center travels from 11px to (rect.width - 11px)
     const padding = 11;
@@ -155,6 +160,10 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     isDraggingRef.current = true;
+    if (sliderBoxRef.current) {
+      const r = sliderBoxRef.current.getBoundingClientRect();
+      trackRectRef.current = { left: r.left, width: r.width };
+    }
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -171,6 +180,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isDraggingRef.current) {
       isDraggingRef.current = false;
+      trackRectRef.current = null;
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {
@@ -269,12 +279,12 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full pointer-events-none transition-all duration-200 ${
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
                       isPassed
                         ? isAllIn
-                          ? 'w-2 h-2 bg-white shadow-[0_0_6px_#ffffff,0_0_9px_#fb7185]'
-                          : 'w-1.5 h-1.5 bg-white/90 shadow-[0_0_2px_rgba(255,255,255,0.7)]'
-                        : 'w-1.5 h-1.5 bg-[#9ca3af]'
+                          ? 'bg-white shadow-[0_0_6px_#ffffff,0_0_8px_#fb7185]'
+                          : 'bg-white/90 shadow-[0_0_2px_rgba(255,255,255,0.7)]'
+                        : 'bg-[#9ca3af]'
                     }`}
                     style={{ left: `calc(11px + (100% - 22px) * ${m.pct / 100})` }}
                   />
@@ -284,10 +294,10 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
             {/* Circular white thumb: Pure clean white circle with smooth natural elevation shadow, no borders, no inner dot, zero lag */}
             <div
-              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white pointer-events-none z-20 transition-all duration-150 ${
+              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white pointer-events-none z-20 transition-shadow duration-150 ${
                 isAllIn
-                  ? 'scale-[1.05] shadow-[0_3px_12px_rgba(225,29,72,0.38),0_1px_3px_rgba(0,0,0,0.12)]'
-                  : 'scale-100 shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)]'
+                  ? 'shadow-[0_3px_12px_rgba(225,29,72,0.38),0_1px_3px_rgba(0,0,0,0.12)]'
+                  : 'shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)]'
               }`}
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
             />
