@@ -54,13 +54,67 @@
   animation: pulse-dot 1.2s infinite ease-in-out;
 }
 
-@keyframes allin-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes allin-plasma-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.allin-track-shimmer {
-  background: linear-gradient(90deg, #f43f5e 0%, #ef4444 30%, #fecdd3 50%, #ef4444 70%, #dc2626 100%);
-  background-size: 200% 100%;
-  animation: allin-shimmer 1.8s linear infinite;
+@keyframes energy-streak {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.95;
+  }
+  75% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateX(320%);
+    opacity: 0;
+  }
+}
+
+@keyframes ember-float-1 {
+  0% { transform: translateX(0) translateY(0); opacity: 0; }
+  30% { opacity: 0.95; }
+  70% { opacity: 0.95; }
+  100% { transform: translateX(180px) translateY(-3px); opacity: 0; }
+}
+
+@keyframes ember-float-2 {
+  0% { transform: translateX(0) translateY(0); opacity: 0; }
+  25% { opacity: 0.85; }
+  75% { opacity: 0.85; }
+  100% { transform: translateX(140px) translateY(3px); opacity: 0; }
+}
+
+@keyframes ember-float-3 {
+  0% { transform: translateX(0) translateY(0); opacity: 0; }
+  35% { opacity: 1; }
+  65% { opacity: 1; }
+  100% { transform: translateX(210px) translateY(-2px); opacity: 0; }
+}
+
+@keyframes button-sweep {
+  0% { transform: translateX(-150%) skewX(-25deg); }
+  35%, 100% { transform: translateX(260%) skewX(-25deg); }
+}
+
+.allin-plasma-track {
+  background: linear-gradient(90deg, #dc2626 0%, #ef4444 18%, #f97316 42%, #fbbf24 55%, #f43f5e 78%, #dc2626 100%);
+  background-size: 260% 100%;
+  animation: allin-plasma-flow 2.2s ease infinite;
+}
+
+.allin-energy-streak {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 20%, rgba(255, 255, 255, 0.95) 50%, rgba(254, 240, 138, 0.95) 70%, transparent 100%);
+  animation: energy-streak 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.allin-button-sheen {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0.08) 80%, transparent 100%);
+  animation: button-sweep 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

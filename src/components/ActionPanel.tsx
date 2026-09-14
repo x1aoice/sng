@@ -235,11 +235,11 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
             className="relative w-52 sm:w-60 h-[28px] flex items-center select-none cursor-pointer touch-none"
           >
             {/* The visual track (chunky rounded pill in #f1f1f4) */}
-            <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden pointer-events-none">
-              {/* Red gradient fill with fiery All-In shimmer */}
+            <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden pointer-events-none shadow-inner">
+              {/* Red gradient fill: Liquid plasma flow + energy surge when All-In */}
               <div
                 className={`absolute left-0 top-0 bottom-0 rounded-l-full pointer-events-none ${
-                  isAllIn ? 'allin-track-shimmer rounded-r-full' : ''
+                  isAllIn ? 'allin-plasma-track rounded-r-full' : ''
                 }`}
                 style={{
                   width:
@@ -250,7 +250,20 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                     ? undefined
                     : 'linear-gradient(90deg, #fb7185 0%, #f43f5e 45%, #e11d48 100%)',
                 }}
-              />
+              >
+                {/* High-energy plasma laser streak & embers when All-In */}
+                {isAllIn && (
+                  <>
+                    <div className="absolute inset-y-0 w-28 allin-energy-streak pointer-events-none" />
+                    <div className="absolute left-3 top-[3px] w-1.5 h-1.5 rounded-full bg-amber-100 shadow-[0_0_6px_#fde047] pointer-events-none animate-[ember-float-1_1.4s_infinite_linear]" />
+                    <div className="absolute left-8 bottom-[4px] w-1 h-1 rounded-full bg-yellow-200 shadow-[0_0_4px_#f59e0b] pointer-events-none animate-[ember-float-2_1.8s_infinite_linear_0.3s]" />
+                    <div className="absolute left-14 top-[6px] w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_5px_#ffffff] pointer-events-none animate-[ember-float-3_1.6s_infinite_linear_0.7s]" />
+                  </>
+                )}
+              </div>
+
+              {/* Translucent glass specular highlight along top edge */}
+              <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/35 to-transparent rounded-t-full pointer-events-none" />
 
               {/* 3 standard interior dots (1/3 Pot, 1/2 Pot, 3/4 Pot) */}
               {interiorDots.map((m) => {
@@ -258,12 +271,12 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full pointer-events-none transition-all duration-200 ${
                       isPassed
                         ? isAllIn
-                          ? 'bg-white shadow-[0_0_4px_white]'
-                          : 'bg-white/85'
-                        : 'bg-[#9ca3af]'
+                          ? 'w-2 h-2 bg-white shadow-[0_0_8px_#ffffff,0_0_12px_#fde047]'
+                          : 'w-1.5 h-1.5 bg-white shadow-[0_0_4px_white]'
+                        : 'w-1.5 h-1.5 bg-[#9ca3af]'
                     }`}
                     style={{ left: `calc(11px + (100% - 22px) * ${m.pct / 100})` }}
                   />
@@ -273,7 +286,11 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
             {/* Circular white thumb: Pure clean white circle with smooth natural elevation shadow, no borders, no inner dot, zero lag */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)] pointer-events-none z-20"
+              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white pointer-events-none z-20 transition-transform duration-150 ${
+                isAllIn
+                  ? 'scale-[1.06] shadow-[0_3px_10px_rgba(0,0,0,0.24),0_1px_3px_rgba(0,0,0,0.14)]'
+                  : 'scale-100 shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)]'
+              }`}
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
             />
           </div>
@@ -325,23 +342,30 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           </button>
         )}
 
-        {/* Primary Bet / Raise Button (Transforms into glowing flame pill on All-In) */}
+        {/* Primary Bet / Raise Button (Transforms into glowing All-In button with sweeping laser sheen) */}
         <button
           type="button"
           disabled={isDisabled || !canIncreaseBet}
           onClick={handleBlackButtonClick}
-          className={`px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400 ${
+          className={`relative overflow-hidden px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400 ${
             isAllIn && showSlider
-              ? 'bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold shadow-[0_0_20px_rgba(225,29,72,0.6)] animate-pulse'
+              ? 'bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-bold shadow-[0_4px_20px_rgba(225,29,72,0.55),0_1px_2px_rgba(0,0,0,0.2)]'
               : 'bg-neutral-900 hover:bg-neutral-800 text-white'
           }`}
         >
+          {/* Sweeping laser sheen on button when All-In */}
+          {isAllIn && showSlider && (
+            <div className="absolute inset-y-0 w-16 allin-button-sheen pointer-events-none" />
+          )}
+
           {!canIncreaseBet ? (
             <span>Raise Closed</span>
           ) : showSlider ? (
             <>
-              <span>{isAllIn ? 'All-in' : actionBaseName}</span>
-              <span>{formatCurrency(sliderAmount)}</span>
+              <span className={isAllIn ? 'tracking-wide font-extrabold uppercase' : ''}>
+                {isAllIn ? 'All-in' : actionBaseName}
+              </span>
+              <span className="font-semibold">{formatCurrency(sliderAmount)}</span>
             </>
           ) : (
             <span>{actionBaseName}</span>
