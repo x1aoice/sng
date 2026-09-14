@@ -221,13 +221,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     >
       {/* Interactive Slider Pill: Red gradient track with All-In fiery effects */}
       {showSlider && !isDisabled && (
-        <div
-          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center bg-white px-3 py-1.5 rounded-full border transition-all duration-300 z-40 select-none ${
-            isAllIn
-              ? 'border-rose-400 shadow-[0_0_24px_rgba(239,68,68,0.35),0_8px_24px_rgba(0,0,0,0.1)] allin-container-glow'
-              : 'border-neutral-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.09)]'
-          } animate-fade-in`}
-        >
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center bg-white px-3 py-1.5 rounded-full border border-neutral-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.09)] z-40 select-none animate-fade-in">
           {/* Slider Box with Direct Pointer Dragging */}
           <div
             ref={sliderBoxRef}

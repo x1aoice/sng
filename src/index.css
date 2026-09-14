@@ -59,21 +59,8 @@
   100% { background-position: 200% 0; }
 }
 
-@keyframes allin-pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.5), 0 0 28px rgba(220, 38, 38, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 24px rgba(239, 68, 68, 0.8), 0 0 40px rgba(220, 38, 38, 0.5);
-  }
-}
-
 .allin-track-shimmer {
   background: linear-gradient(90deg, #f43f5e 0%, #ef4444 30%, #fecdd3 50%, #ef4444 70%, #dc2626 100%);
   background-size: 200% 100%;
   animation: allin-shimmer 1.8s linear infinite;
-}
-
-.allin-container-glow {
-  animation: allin-pulse-glow 1.5s ease-in-out infinite;
 }
