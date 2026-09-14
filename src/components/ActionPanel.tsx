@@ -124,6 +124,61 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const isAllIn = isAllInTarget(sliderAmount, maxBet);
   const actionBaseName = canCheck ? 'Bet' : 'Raise';
 
+  const sliderBoxRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+
+  const updateFromPointer = (clientX: number) => {
+    if (!sliderBoxRef.current) return;
+    const rect = sliderBoxRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+
+    // Track interior: thumb center travels from 11px to (rect.width - 11px)
+    const padding = 11;
+    const usableWidth = rect.width - padding * 2;
+    const relativeX = clientX - rect.left - padding;
+    const rawPct = (relativeX / usableWidth) * 100;
+
+    let pct: number;
+    if (rawPct <= 1.5) {
+      pct = 0;
+    } else if (rawPct >= 98.5) {
+      pct = 100;
+    } else {
+      pct = Math.max(0, Math.min(100, rawPct));
+    }
+
+    setSliderPercent(pct);
+    const amt = percentToAmount(pct);
+    setSliderAmount(amt);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    isDraggingRef.current = true;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+    updateFromPointer(e.clientX);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    updateFromPointer(e.clientX);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+    }
+  };
+
   // Dramatic sound & haptic feedback when pulling all the way to All-In
   const prevIsAllInRef = useRef(false);
   useEffect(() => {
@@ -173,26 +228,28 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               : 'border-neutral-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.09)]'
           } animate-fade-in`}
         >
-          {/* Floating All-In Tag with Flame */}
-          {isAllIn && (
-            <div className="absolute -top-7 right-2 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 text-white font-black text-[10px] tracking-wider px-2 py-0.5 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.7)] flex items-center gap-1 animate-bounce pointer-events-none select-none">
-              <span>🔥</span>
-              <span>ALL IN</span>
-            </div>
-          )}
-
-          {/* Slider Box */}
-          <div className="relative w-52 sm:w-60 h-[28px] flex items-center select-none">
+          {/* Slider Box with Direct Pointer Dragging */}
+          <div
+            ref={sliderBoxRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onLostPointerCapture={() => {
+              isDraggingRef.current = false;
+            }}
+            className="relative w-52 sm:w-60 h-[28px] flex items-center select-none cursor-pointer touch-none"
+          >
             {/* The visual track (chunky rounded pill in #f1f1f4) */}
-            <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden">
+            <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden pointer-events-none">
               {/* Red gradient fill with fiery All-In shimmer */}
               <div
-                className={`absolute left-0 top-0 bottom-0 rounded-l-full pointer-events-none transition-all duration-100 ${
+                className={`absolute left-0 top-0 bottom-0 rounded-l-full pointer-events-none ${
                   isAllIn ? 'allin-track-shimmer rounded-r-full' : ''
                 }`}
                 style={{
                   width:
-                    sliderPercent >= 98
+                    sliderPercent >= 98.5
                       ? '100%'
                       : `calc(11px + (100% - 22px) * ${sliderPercent / 100})`,
                   background: isAllIn
@@ -207,7 +264,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-all duration-150 ${
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
                       isPassed
                         ? isAllIn
                           ? 'bg-white shadow-[0_0_4px_white]'
@@ -220,43 +277,10 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               })}
             </div>
 
-            {/* Circular white thumb with red gradient indicator and All-In flame effect */}
+            {/* Circular white thumb: Pure clean white circle with smooth natural elevation shadow, no borders, no inner dot, zero lag */}
             <div
-              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white flex items-center justify-center pointer-events-none z-20 transition-all duration-200 ${
-                isAllIn
-                  ? 'scale-110 ring-4 ring-rose-500/70 shadow-[0_0_16px_rgba(239,68,68,0.9)]'
-                  : 'shadow-[0_2px_7px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.12)] border border-rose-200 active:scale-105'
-              }`}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)] pointer-events-none z-20"
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
-            >
-              {isAllIn ? (
-                <span className="text-[12px] leading-none select-none">🔥</span>
-              ) : (
-                <div className="w-2 h-2 rounded-full bg-rose-500" />
-              )}
-            </div>
-
-            {/* Invisible native range input overlay for seamless drag / touch */}
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={0.2}
-              value={sliderPercent}
-              onChange={(e) => {
-                let val = Number(e.target.value);
-                // Gentle snap to nearest milestone dot when within 2.5%
-                for (const m of milestones) {
-                  if (Math.abs(val - m.pct) <= 2.5) {
-                    val = m.pct;
-                    break;
-                  }
-                }
-                setSliderPercent(val);
-                const amt = percentToAmount(val);
-                setSliderAmount(amt);
-              }}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
             />
           </div>
         </div>
@@ -322,7 +346,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
             <span>Raise Closed</span>
           ) : showSlider ? (
             <>
-              {isAllIn && <span>🔥</span>}
               <span>{isAllIn ? 'All-in' : actionBaseName}</span>
               <span>{formatCurrency(sliderAmount)}</span>
             </>
