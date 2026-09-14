@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Player, ActionType } from '../engine/types';
 import { formatCurrency } from '../utils/format';
 import { getBettingBounds, isAllInTarget } from '../utils/betting';
+import { sound } from '../utils/sound';
 
 interface ActionPanelProps {
   hero: Player;
@@ -123,6 +124,22 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const isAllIn = isAllInTarget(sliderAmount, maxBet);
   const actionBaseName = canCheck ? 'Bet' : 'Raise';
 
+  // Dramatic sound & haptic feedback when pulling all the way to All-In
+  const prevIsAllInRef = useRef(false);
+  useEffect(() => {
+    if (isAllIn && !prevIsAllInRef.current && showSlider) {
+      sound.playAllIn();
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try {
+          navigator.vibrate([25, 40, 25]);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    prevIsAllInRef.current = isAllIn;
+  }, [isAllIn, showSlider]);
+
   const handleBlackButtonClick = () => {
     if (isDisabled) return;
     if (!showSlider) {
@@ -147,23 +164,40 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         isDisabled ? 'opacity-35 pointer-events-none cursor-not-allowed' : 'opacity-100'
       }`}
     >
-      {/* Interactive Slider Pill: EXACT style matching reference image */}
+      {/* Interactive Slider Pill: Red gradient track with All-In fiery effects */}
       {showSlider && !isDisabled && (
         <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center bg-white px-3 py-1.5 rounded-full border border-neutral-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.09)] animate-fade-in z-40 select-none"
+          className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center bg-white px-3 py-1.5 rounded-full border transition-all duration-300 z-40 select-none ${
+            isAllIn
+              ? 'border-rose-400 shadow-[0_0_24px_rgba(239,68,68,0.35),0_8px_24px_rgba(0,0,0,0.1)] allin-container-glow'
+              : 'border-neutral-200/90 shadow-[0_8px_24px_rgba(0,0,0,0.09)]'
+          } animate-fade-in`}
         >
+          {/* Floating All-In Tag with Flame */}
+          {isAllIn && (
+            <div className="absolute -top-7 right-2 bg-gradient-to-r from-rose-600 via-red-600 to-amber-500 text-white font-black text-[10px] tracking-wider px-2 py-0.5 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.7)] flex items-center gap-1 animate-bounce pointer-events-none select-none">
+              <span>🔥</span>
+              <span>ALL IN</span>
+            </div>
+          )}
+
           {/* Slider Box */}
           <div className="relative w-52 sm:w-60 h-[28px] flex items-center select-none">
-            {/* The visual track (chunky rounded pill in #e8e8ed) */}
-            <div className="relative w-full h-[22px] rounded-full bg-[#e8e8ed] overflow-hidden">
-              {/* Blue fill (vibrant iOS blue #3a83f7) */}
+            {/* The visual track (chunky rounded pill in #f1f1f4) */}
+            <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden">
+              {/* Red gradient fill with fiery All-In shimmer */}
               <div
-                className="absolute left-0 top-0 bottom-0 bg-[#3a83f7] rounded-l-full pointer-events-none"
+                className={`absolute left-0 top-0 bottom-0 rounded-l-full pointer-events-none transition-all duration-100 ${
+                  isAllIn ? 'allin-track-shimmer rounded-r-full' : ''
+                }`}
                 style={{
                   width:
                     sliderPercent >= 98
                       ? '100%'
                       : `calc(11px + (100% - 22px) * ${sliderPercent / 100})`,
+                  background: isAllIn
+                    ? undefined
+                    : 'linear-gradient(90deg, #fb7185 0%, #f43f5e 45%, #e11d48 100%)',
                 }}
               />
 
@@ -173,8 +207,12 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
-                      isPassed ? 'bg-white/75' : 'bg-[#9ca3af]'
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-all duration-150 ${
+                      isPassed
+                        ? isAllIn
+                          ? 'bg-white shadow-[0_0_4px_white]'
+                          : 'bg-white/85'
+                        : 'bg-[#9ca3af]'
                     }`}
                     style={{ left: `calc(11px + (100% - 22px) * ${m.pct / 100})` }}
                   />
@@ -182,11 +220,21 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               })}
             </div>
 
-            {/* Circular white thumb with soft elevation shadow */}
+            {/* Circular white thumb with red gradient indicator and All-In flame effect */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white shadow-[0_2px_7px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.12),0_0_1px_rgba(0,0,0,0.15)] border border-black/[0.04] pointer-events-none z-20 transition-transform active:scale-105"
+              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white flex items-center justify-center pointer-events-none z-20 transition-all duration-200 ${
+                isAllIn
+                  ? 'scale-110 ring-4 ring-rose-500/70 shadow-[0_0_16px_rgba(239,68,68,0.9)]'
+                  : 'shadow-[0_2px_7px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.12)] border border-rose-200 active:scale-105'
+              }`}
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
-            />
+            >
+              {isAllIn ? (
+                <span className="text-[12px] leading-none select-none">🔥</span>
+              ) : (
+                <div className="w-2 h-2 rounded-full bg-rose-500" />
+              )}
+            </div>
 
             {/* Invisible native range input overlay for seamless drag / touch */}
             <input
@@ -259,17 +307,22 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           </button>
         )}
 
-        {/* Primary Bet / Raise Button (Dark pill) */}
+        {/* Primary Bet / Raise Button (Transforms into glowing flame pill on All-In) */}
         <button
           type="button"
           disabled={isDisabled || !canIncreaseBet}
           onClick={handleBlackButtonClick}
-          className="px-3 sm:px-6 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className={`px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400 ${
+            isAllIn && showSlider
+              ? 'bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold shadow-[0_0_20px_rgba(225,29,72,0.6)] animate-pulse'
+              : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+          }`}
         >
           {!canIncreaseBet ? (
             <span>Raise Closed</span>
           ) : showSlider ? (
             <>
+              {isAllIn && <span>🔥</span>}
               <span>{isAllIn ? 'All-in' : actionBaseName}</span>
               <span>{formatCurrency(sliderAmount)}</span>
             </>
