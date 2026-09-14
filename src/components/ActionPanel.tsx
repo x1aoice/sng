@@ -358,7 +358,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           }`}
         >
           {!canIncreaseBet ? (
-            <span>Raise Closed</span>
+            <span>Raise</span>
           ) : showSlider ? (
             <>
               <span className={isAllIn ? 'tracking-wide font-extrabold uppercase' : ''}>
