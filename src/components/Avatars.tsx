@@ -7,6 +7,7 @@ interface AvatarProps {
 
 export const PlayerAvatar: React.FC<AvatarProps> = ({ name, className = 'w-full h-full' }) => {
   switch (name) {
+    case '赌神':
     case 'You':
       return (
         <svg viewBox="0 0 36 36" fill="none" className={className}>

@@ -145,7 +145,7 @@ export const Table: React.FC<TableProps> = ({
                     ? `${gameState.handResults
                         .map((r) => {
                           const p = gameState.players.find((pl) => pl.id === r.playerId);
-                          return p?.isUser ? 'You' : p?.name || 'Player';
+                          return p?.name || 'Player';
                         })
                         .join(' & ')} split the pot`
                     : gameState.handResults[0].description;

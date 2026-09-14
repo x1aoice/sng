@@ -49,7 +49,7 @@ export const INITIAL_PLAYERS: Omit<
 >[] = [
   {
     id: 'p0',
-    name: 'You',
+    name: '赌神',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
     isUser: true,
     chips: 10_000_000,
@@ -553,7 +553,7 @@ export function progressGameRound(state: GameState): GameState {
       return p;
     });
 
-    const winnerName = winner.isUser ? 'You' : winner.name;
+    const winnerName = winner.name;
     const handResult: HandResult = {
       playerId: winner.id,
       wonAmount: state.pot,
