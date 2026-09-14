@@ -236,10 +236,10 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           >
             {/* The visual track (chunky rounded pill in #f1f1f4) */}
             <div className="relative w-full h-[22px] rounded-full bg-[#f1f1f4] overflow-hidden pointer-events-none shadow-inner">
-              {/* Red gradient fill: Gentle unidirectional ruby flow when All-In */}
+              {/* Red gradient fill: Molten liquid flame flow + breathing heat when All-In */}
               <div
                 className={`absolute left-0 top-0 bottom-0 rounded-l-full pointer-events-none ${
-                  isAllIn ? 'allin-ruby-flow rounded-r-full' : ''
+                  isAllIn ? 'allin-molten-track rounded-r-full' : ''
                 }`}
                 style={{
                   width:
@@ -250,10 +250,18 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                     ? undefined
                     : 'linear-gradient(90deg, #fb7185 0%, #f43f5e 45%, #e11d48 100%)',
                 }}
-              />
+              >
+                {/* Soft warm drifting embers contained within track when All-In */}
+                {isAllIn && (
+                  <>
+                    <div className="absolute left-3 top-[3px] w-1.5 h-1.5 rounded-full bg-rose-200/70 shadow-[0_0_5px_#f43f5e] pointer-events-none animate-[allin-ember-drift_2s_infinite_linear]" />
+                    <div className="absolute left-10 bottom-[4px] w-1.5 h-1.5 rounded-full bg-pink-100/80 shadow-[0_0_5px_#fb7185] pointer-events-none animate-[allin-ember-drift_2.4s_infinite_linear_0.6s]" />
+                  </>
+                )}
+              </div>
 
-              {/* Subtle glass specular highlight along top edge */}
-              <div className="absolute inset-x-0 top-0 h-[38%] bg-gradient-to-b from-white/20 to-transparent rounded-t-full pointer-events-none" />
+              {/* 3D Glass specular highlight along top edge */}
+              <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-white/30 to-transparent rounded-t-full pointer-events-none" />
 
               {/* 3 standard interior dots (1/3 Pot, 1/2 Pot, 3/4 Pot) */}
               {interiorDots.map((m) => {
@@ -261,8 +269,12 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 return (
                   <div
                     key={m.id}
-                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors duration-150 ${
-                      isPassed ? 'bg-white/85' : 'bg-[#9ca3af]'
+                    className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full pointer-events-none transition-all duration-200 ${
+                      isPassed
+                        ? isAllIn
+                          ? 'w-2 h-2 bg-white shadow-[0_0_6px_#ffffff,0_0_9px_#fb7185]'
+                          : 'w-1.5 h-1.5 bg-white/90 shadow-[0_0_2px_rgba(255,255,255,0.7)]'
+                        : 'w-1.5 h-1.5 bg-[#9ca3af]'
                     }`}
                     style={{ left: `calc(11px + (100% - 22px) * ${m.pct / 100})` }}
                   />
@@ -272,7 +284,11 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
             {/* Circular white thumb: Pure clean white circle with smooth natural elevation shadow, no borders, no inner dot, zero lag */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)] pointer-events-none z-20"
+              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white pointer-events-none z-20 transition-all duration-150 ${
+                isAllIn
+                  ? 'scale-[1.05] shadow-[0_3px_12px_rgba(225,29,72,0.38),0_1px_3px_rgba(0,0,0,0.12)]'
+                  : 'scale-100 shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)]'
+              }`}
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
             />
           </div>
@@ -324,14 +340,14 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           </button>
         )}
 
-        {/* Primary Bet / Raise Button (Transforms into clean ruby All-In button) */}
+        {/* Primary Bet / Raise Button (Transforms into rich ruby All-In button with breathing pulse) */}
         <button
           type="button"
           disabled={isDisabled || !canIncreaseBet}
           onClick={handleBlackButtonClick}
           className={`px-3 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-400 ${
             isAllIn && showSlider
-              ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold shadow-[0_2px_10px_rgba(225,29,72,0.35)]'
+              ? 'allin-btn-active bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white font-bold'
               : 'bg-neutral-900 hover:bg-neutral-800 text-white'
           }`}
         >
@@ -339,7 +355,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
             <span>Raise Closed</span>
           ) : showSlider ? (
             <>
-              <span>{isAllIn ? 'All-in' : actionBaseName}</span>
+              <span className={isAllIn ? 'tracking-wide font-extrabold uppercase' : ''}>
+                {isAllIn ? 'All-in' : actionBaseName}
+              </span>
               <span className="font-semibold">{formatCurrency(sliderAmount)}</span>
             </>
           ) : (
