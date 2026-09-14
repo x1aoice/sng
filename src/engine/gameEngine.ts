@@ -553,10 +553,11 @@ export function progressGameRound(state: GameState): GameState {
       return p;
     });
 
+    const winnerName = winner.isUser ? 'You' : winner.name;
     const handResult: HandResult = {
       playerId: winner.id,
       wonAmount: state.pot,
-      description: 'Everyone else folded',
+      description: `${winnerName} won ${formatTokens(state.pot, true)} · Everyone else folded`,
     };
 
     sound.playWin();

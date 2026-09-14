@@ -102,14 +102,25 @@ export const Table: React.FC<TableProps> = ({
               {gameState.phase === 'hand_ended' && gameState.handResults.length > 0 && (() => {
                 const heroPlayer = gameState.players.find((p) => p.isUser);
                 const isHeroBusted = heroPlayer ? (heroPlayer.eliminated || heroPlayer.chips <= 0) : false;
+                const isHeroWinner = gameState.handResults.some((r) => r.playerId === heroPlayer?.id);
+                const resultText =
+                  gameState.handResults.length > 1
+                    ? `${gameState.handResults
+                        .map((r) => {
+                          const p = gameState.players.find((pl) => pl.id === r.playerId);
+                          return p?.isUser ? 'You' : p?.name || 'Player';
+                        })
+                        .join(' & ')} split the pot`
+                    : gameState.handResults[0].description;
+
                 return (
                   <div
                     onClick={onStartNextHand}
                     className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
                   >
-                    <div className="bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-2 rounded-2xl sm:rounded-full shadow-md flex items-center justify-center gap-2 max-w-[80vw] whitespace-normal text-center group-hover:scale-[1.02] active:scale-95 transition-all">
-                      <span>{isHeroBusted ? '💀' : '🏆'}</span>
-                      <span>{gameState.handResults[0].description}</span>
+                    <div className="bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-1.5 sm:py-2 rounded-full shadow-md flex items-center justify-center gap-2 max-w-[90vw] whitespace-nowrap group-hover:scale-[1.02] active:scale-95 transition-all">
+                      <span>{isHeroBusted ? '💀' : isHeroWinner ? '🏆' : '✨'}</span>
+                      <span className="tracking-tight">{resultText}</span>
                       {isHeroBusted && (
                         <span className="text-neutral-400 text-xs font-normal border-l border-neutral-700 pl-2">
                           Eliminated · View Results
@@ -131,8 +142,8 @@ export const Table: React.FC<TableProps> = ({
                 </button>
               )}
 
-              {/* Blind Level Typography (Pure text, no border/box, no next-hand badge, hidden when idle) */}
-              {gameState.phase !== 'idle' && (
+              {/* Blind Level Typography (Pure text, no border/box, hidden when idle or hand_ended) */}
+              {gameState.phase !== 'idle' && gameState.phase !== 'hand_ended' && (
                 <div className="flex items-center gap-1.5 text-xs text-neutral-400 font-medium tracking-tight animate-fade-in select-none">
                   <span>Hand #{handNum}</span>
                   <span className="text-neutral-300">·</span>
