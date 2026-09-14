@@ -99,18 +99,11 @@ export const Seat: React.FC<SeatProps> = ({
           <div
             className={`flex items-center gap-1.5 sm:gap-2.5 bg-white pl-1 pr-2 sm:pl-1.5 sm:pr-4 py-1 sm:py-1.5 rounded-full border transition-all duration-300 whitespace-nowrap ${
               isWinner
-                ? 'border-amber-400 animate-winner-glow ring-2 ring-amber-200'
+                ? 'border-amber-400 shadow-[0_2px_8px_rgba(251,191,36,0.25)]'
                 : isCurrentTurn
-                ? 'border-sky-400 ring-2 ring-sky-100 shadow-md animate-turn-halo'
+                ? 'border-sky-400 shadow-[0_2px_8px_rgba(56,189,248,0.2)]'
                 : 'border-neutral-200/80 shadow-xs'
             } ${player.folded ? 'opacity-40' : 'opacity-100'}`}
-            style={{
-              boxShadow: isWinner
-                ? undefined
-                : isCurrentTurn
-                ? '0 0 0 2px rgba(56, 189, 248, 0.25), 0 4px 14px rgba(0,0,0,0.06)'
-                : '0 1px 4px rgba(0,0,0,0.03)',
-            }}
           >
             {/* High-end vector portrait avatar */}
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0 shadow-2xs">
