@@ -114,11 +114,11 @@
 @keyframes pill-slide-up {
   0% {
     opacity: 0;
-    transform: translate(-50%, 5px) scale(0.95);
+    transform: translateY(5px) scale(0.95);
   }
   100% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
