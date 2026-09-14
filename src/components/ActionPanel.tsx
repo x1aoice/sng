@@ -292,13 +292,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
               })}
             </div>
 
-            {/* Circular white thumb: Pure clean white circle with smooth natural elevation shadow, no borders, no inner dot, zero lag */}
+            {/* Circular white thumb: Plain static white circle with zero effects, no borders, no inner dots, zero lag */}
             <div
-              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white pointer-events-none z-20 transition-shadow duration-150 ${
-                isAllIn
-                  ? 'shadow-[0_3px_12px_rgba(225,29,72,0.38),0_1px_3px_rgba(0,0,0,0.12)]'
-                  : 'shadow-[0_2px_8px_rgba(0,0,0,0.18),0_1px_2px_rgba(0,0,0,0.1)]'
-              }`}
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.15)] pointer-events-none z-20"
               style={{ left: `calc(11px + (100% - 22px) * ${sliderPercent / 100})` }}
             />
           </div>
