@@ -11,6 +11,8 @@ interface SeatProps {
   positionClass: string;
   showCards?: boolean;
   handPhase: string;
+  isWinner?: boolean;
+  winningCardKeys?: Set<string>;
 }
 
 export const Seat: React.FC<SeatProps> = ({
@@ -20,10 +22,21 @@ export const Seat: React.FC<SeatProps> = ({
   positionClass,
   showCards = false,
   handPhase,
+  isWinner = false,
+  winningCardKeys,
 }) => {
-  const hasCards = player.cards.length === 2 && !player.folded && !player.eliminated;
+  const hasCards = player.cards.length === 2 && !player.eliminated;
   const isHero = player.isUser;
-  const revealCards = (isHero || showCards) && hasCards;
+  const revealCards = (isHero || showCards) && hasCards && !player.folded;
+
+  const card0Key = player.cards[0] ? `${player.cards[0].rank}-${player.cards[0].suit}` : '';
+  const card1Key = player.cards[1] ? `${player.cards[1].rank}-${player.cards[1].suit}` : '';
+  const isShowdown = handPhase === 'showdown' || handPhase === 'hand_ended';
+  const isCard0Winning = isShowdown && winningCardKeys?.has(card0Key);
+  const isCard1Winning = isShowdown && winningCardKeys?.has(card1Key);
+  const hasWinningCards = isShowdown && winningCardKeys && winningCardKeys.size > 0;
+  const isCard0Dimmed = hasWinningCards && !isCard0Winning;
+  const isCard1Dimmed = hasWinningCards && !isCard1Winning;
 
   // Calculate dealer button position:
   // For right-side seats (4 & 5: Sophia, Leo), place cleanly on the left of the capsule (towards table center).
@@ -55,9 +68,11 @@ export const Seat: React.FC<SeatProps> = ({
         {hasCards && (
           <div
             className={`absolute z-0 pointer-events-none transition-all duration-300 flex ${
-              revealCards
-                ? '-top-[38px] sm:-top-[54px] -space-x-2.5 sm:-space-x-3.5'
-                : '-top-6 sm:-top-[36px] -space-x-2 sm:-space-x-2.5'
+              player.folded
+                ? 'top-0 translate-y-3 scale-90 opacity-20 grayscale'
+                : revealCards
+                ? '-top-[38px] sm:-top-[54px] -space-x-2.5 sm:-space-x-3.5 opacity-100'
+                : '-top-6 sm:-top-[36px] -space-x-2 sm:-space-x-2.5 opacity-100'
             }`}
           >
             <PlayingCard
@@ -65,12 +80,16 @@ export const Seat: React.FC<SeatProps> = ({
               faceDown={!revealCards}
               tilt="left"
               size={revealCards ? 'lg' : 'sm'}
+              highlighted={isCard0Winning}
+              dimmed={player.folded || isCard0Dimmed}
             />
             <PlayingCard
               card={player.cards[1]}
               faceDown={!revealCards}
               tilt="right"
               size={revealCards ? 'lg' : 'sm'}
+              highlighted={isCard1Winning}
+              dimmed={player.folded || isCard1Dimmed}
             />
           </div>
         )}
@@ -79,12 +98,16 @@ export const Seat: React.FC<SeatProps> = ({
         <div className="relative flex items-center z-10">
           <div
             className={`flex items-center gap-1.5 sm:gap-2.5 bg-white pl-1 pr-2 sm:pl-1.5 sm:pr-4 py-1 sm:py-1.5 rounded-full border transition-all duration-300 whitespace-nowrap ${
-              isCurrentTurn
-                ? 'border-sky-400 ring-2 ring-sky-100 shadow-md'
+              isWinner
+                ? 'border-amber-400 animate-winner-glow ring-2 ring-amber-200'
+                : isCurrentTurn
+                ? 'border-sky-400 ring-2 ring-sky-100 shadow-md animate-turn-halo'
                 : 'border-neutral-200/80 shadow-xs'
             } ${player.folded ? 'opacity-40' : 'opacity-100'}`}
             style={{
-              boxShadow: isCurrentTurn
+              boxShadow: isWinner
+                ? undefined
+                : isCurrentTurn
                 ? '0 0 0 2px rgba(56, 189, 248, 0.25), 0 4px 14px rgba(0,0,0,0.06)'
                 : '0 1px 4px rgba(0,0,0,0.03)',
             }}
@@ -124,7 +147,7 @@ export const Seat: React.FC<SeatProps> = ({
 
         {/* Status Pill (Thinking, Bet, or Check) - positioned consistently directly under each player's capsule */}
         {isCurrentTurn && handPhase !== 'hand_ended' ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/95 px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] text-neutral-500 font-medium whitespace-nowrap z-20">
+          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/95 px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] text-neutral-500 font-medium whitespace-nowrap z-20 animate-pill-slide-up">
             <span className="flex items-center gap-0.5 text-neutral-400">
               <span className="w-1 h-1 rounded-full bg-neutral-400 animate-pulse-dot" />
               <span className="w-1 h-1 rounded-full bg-neutral-400 animate-pulse-dot" style={{ animationDelay: '0.2s' }} />
@@ -143,12 +166,12 @@ export const Seat: React.FC<SeatProps> = ({
             </span>
           </div>
         ) : !player.folded && player.currentBet > 0 ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium whitespace-nowrap z-20">
+          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium whitespace-nowrap z-20 animate-pill-slide-up">
             <span className="text-neutral-400 text-[11px]">{player.isAllIn ? 'All-in' : 'Bet'}</span>
             <span className="font-semibold text-neutral-900 text-[11px]">{formatCurrency(player.currentBet)}</span>
           </div>
         ) : !player.folded && player.lastAction?.type === 'check' ? (
-          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center bg-white px-3 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium text-neutral-700 whitespace-nowrap z-20">
+          <div className="absolute top-[calc(100%+6px)] left-1/2 -translate-x-1/2 flex items-center bg-white px-3 py-0.5 rounded-full border border-neutral-200/80 shadow-xs text-[11px] font-medium text-neutral-700 whitespace-nowrap z-20 animate-pill-slide-up">
             Check
           </div>
         ) : null}

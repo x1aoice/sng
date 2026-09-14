@@ -8,6 +8,9 @@ interface PlayingCardProps {
   className?: string;
   tilt?: 'left' | 'right' | 'none';
   dimmed?: boolean;
+  highlighted?: boolean;
+  animateDeal?: boolean;
+  dealDelayMs?: number;
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -17,6 +20,9 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   className = '',
   tilt = 'none',
   dimmed = false,
+  highlighted = false,
+  animateDeal = false,
+  dealDelayMs = 0,
   size = 'md',
 }) => {
   const isRed = card?.suit === '♥' || card?.suit === '♦';
@@ -42,14 +48,21 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
   const tiltClass =
     tilt === 'left' ? '-rotate-6 -translate-x-1' : tilt === 'right' ? 'rotate-6 translate-x-1' : '';
 
+  const animationClass = animateDeal ? 'animate-card-flip' : '';
+  const highlightClass = highlighted
+    ? '-translate-y-1 sm:-translate-y-2 ring-2 ring-amber-400 shadow-[0_6px_20px_rgba(251,191,36,0.35)] z-20'
+    : '';
+  const animationStyle = dealDelayMs ? { animationDelay: `${dealDelayMs}ms` } : undefined;
+
   if (faceDown || !card) {
     return (
       <div
-        className={`relative ${cardDimensions} ${tiltClass} ${className} ${
+        className={`relative ${cardDimensions} ${tiltClass} ${animationClass} ${highlightClass} ${className} ${
           dimmed ? 'opacity-40 grayscale' : 'opacity-100'
         } bg-white text-neutral-900 border border-neutral-200/90 shadow-sm flex items-center justify-center transition-all duration-300 select-none overflow-hidden p-0`}
         style={{
           boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
+          ...animationStyle,
         }}
       >
         {/* Pure Minimalist White Card Back - Iconic Polaris Star Mark (Dead Center, Small & Refined) */}
@@ -78,11 +91,12 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 
   return (
     <div
-      className={`relative ${cardDimensions} ${faceUpPadding} ${tiltClass} ${className} ${
+      className={`relative ${cardDimensions} ${faceUpPadding} ${tiltClass} ${animationClass} ${highlightClass} ${className} ${
         dimmed ? 'opacity-35 grayscale' : 'opacity-100'
       } bg-white border border-neutral-200/90 shadow-sm flex flex-col transition-all duration-300 select-none overflow-hidden`}
       style={{
         boxShadow: '0 2px 8px -1px rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)',
+        ...animationStyle,
       }}
     >
       {/* Top-Left Corner Index with refined typographic hierarchy */}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import type { GameState } from '../engine/gameEngine';
 import { getBlindForHand } from '../engine/gameEngine';
 import type { ActionType } from '../engine/types';
@@ -28,6 +28,39 @@ export const Table: React.FC<TableProps> = ({
 
   const handNum = Math.max(1, gameState.handNumber);
   const currentBlind = getBlindForHand(handNum);
+
+  // Pot bump animation key on value increases
+  const [potBumpKey, setPotBumpKey] = useState(0);
+  const prevPotRef = useRef(gameState.pot);
+
+  useEffect(() => {
+    if (gameState.pot > prevPotRef.current) {
+      setPotBumpKey((k) => k + 1);
+    }
+    prevPotRef.current = gameState.pot;
+  }, [gameState.pot]);
+
+  // Compute winning cards for showdown highlights
+  const winningCardKeys = useMemo(() => {
+    if (gameState.phase !== 'showdown' && gameState.phase !== 'hand_ended') {
+      return new Set<string>();
+    }
+    const keys = new Set<string>();
+    for (const r of gameState.handResults) {
+      if (r.evaluation?.bestFiveCards) {
+        for (const c of r.evaluation.bestFiveCards) {
+          keys.add(`${c.rank}-${c.suit}`);
+        }
+      }
+    }
+    return keys;
+  }, [gameState.phase, gameState.handResults]);
+
+  // Compute winner IDs for seat aura
+  const winnerIds = useMemo(() => {
+    if (gameState.phase !== 'hand_ended') return new Set<string>();
+    return new Set(gameState.handResults.map((r) => r.playerId));
+  }, [gameState.phase, gameState.handResults]);
 
   // 6 radial seating positions along the perimeter of the 700x405 stadium (mathematically symmetric)
   const seatPositions = [
@@ -76,13 +109,16 @@ export const Table: React.FC<TableProps> = ({
         >
           {/* Center Area: Dead Centered Board (Community Cards, Pot, Blind Level, Announcements) */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none z-10">
-            {/* Center Pot Pill - Fixed cleanly above community cards */}
+            {/* Center Pot Pill - Fixed cleanly above community cards with bump pulse on chips increase */}
             <div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-neutral-200/80 shadow-2xs pointer-events-auto whitespace-nowrap"
+              key={`pot-pill-${potBumpKey}`}
+              className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border border-neutral-200/80 shadow-2xs pointer-events-auto whitespace-nowrap transition-all duration-200 ${
+                potBumpKey > 0 ? 'animate-pot-bump' : ''
+              }`}
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
             >
               <span className="text-xs text-neutral-400 font-normal">Pot</span>
-              <span className="text-xs sm:text-[13px] font-bold text-neutral-900">
+              <span className="text-xs sm:text-[13px] font-bold text-neutral-900 tabular-nums">
                 {formatCurrency(gameState.pot)}
               </span>
             </div>
@@ -92,13 +128,14 @@ export const Table: React.FC<TableProps> = ({
               <CommunityCards
                 cards={gameState.communityCards}
                 phase={gameState.phase}
+                winningCardKeys={winningCardKeys}
               />
             </div>
 
             {/* Sub-center Area below Community Cards (Blind Level, Announcements, Start Button) */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3.5 flex flex-col items-center pointer-events-auto whitespace-nowrap gap-2">
 
-              {/* Hand Result Announcement Banner (Shown on hand_ended) */}
+              {/* Hand Result Announcement Banner (Shown on hand_ended) with spring entrance and smooth countdown line */}
               {gameState.phase === 'hand_ended' && gameState.handResults.length > 0 && (() => {
                 const heroPlayer = gameState.players.find((p) => p.isUser);
                 const isHeroBusted = heroPlayer ? (heroPlayer.eliminated || heroPlayer.chips <= 0) : false;
@@ -116,16 +153,27 @@ export const Table: React.FC<TableProps> = ({
                 return (
                   <div
                     onClick={onStartNextHand}
-                    className="flex flex-col items-center animate-fade-in cursor-pointer group select-none"
+                    className="flex flex-col items-center animate-banner-spring cursor-pointer group select-none relative"
                   >
-                    <div className="bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-1.5 sm:py-2 rounded-full shadow-md flex items-center justify-center gap-2 max-w-[90vw] whitespace-nowrap group-hover:scale-[1.02] active:scale-95 transition-all">
+                    <div className="relative overflow-hidden bg-neutral-900 text-white text-[11px] sm:text-[13px] font-medium px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-lg flex items-center justify-center gap-2 max-w-[90vw] whitespace-nowrap group-hover:scale-[1.02] active:scale-95 transition-all">
                       <span>{isHeroBusted ? '💀' : isHeroWinner ? '🏆' : '✨'}</span>
                       <span className="tracking-tight">{resultText}</span>
-                      {isHeroBusted && (
+                      {isHeroBusted ? (
                         <span className="text-neutral-400 text-xs font-normal border-l border-neutral-700 pl-2">
                           Eliminated · View Results
                         </span>
+                      ) : (
+                        <span className="text-neutral-400 text-[10px] font-normal border-l border-neutral-700 pl-2 group-hover:text-white transition-colors">
+                          Tap to skip
+                        </span>
                       )}
+                      {/* Countdown indicator bar across bottom of pill */}
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-400 via-indigo-400 to-amber-400 opacity-80"
+                        style={{
+                          animation: `progress-countdown ${isHeroBusted ? 1.4 : 2.2}s linear forwards`,
+                        }}
+                      />
                     </div>
                   </div>
                 );
@@ -159,6 +207,7 @@ export const Table: React.FC<TableProps> = ({
           {gameState.players.map((player) => {
             const isCurrent = gameState.currentTurnSeat === player.seatIndex;
             const isDealer = gameState.dealerSeat === player.seatIndex;
+            const isWinner = winnerIds.has(player.id);
 
             return (
               <Seat
@@ -169,6 +218,8 @@ export const Table: React.FC<TableProps> = ({
                 positionClass={seatPositions[player.seatIndex]}
                 showCards={gameState.showdownCardsRevealed}
                 handPhase={gameState.phase}
+                isWinner={isWinner}
+                winningCardKeys={winningCardKeys}
               />
             );
           })}
